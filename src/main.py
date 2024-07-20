@@ -188,6 +188,9 @@ def  init():
     if not os.path.exists("ImageCache"):
         os.mkdir("ImageCache")
 
+    if not os.path.exists("src/savedConfigs"):
+        os.mkdir("src/savedConfigs")
+
     # Declare global variables to be used in other functions
     global client_secret, colors, client_id, username, display
 
@@ -456,7 +459,7 @@ def checkSong():
     """
 
     with open("src/songCheck.txt", "r") as f:
-        return f.read()
+        return f.read().split(",")[0]
     
 def get_image_from_cache(imageUrl):
     try:
@@ -855,7 +858,7 @@ def blurred(cover_url, display_dimensions):
 
 
 def get_audio_analysis(song_id):
-    """
+    """SavedCo
     Get the audio analysis for a song from the Spotify API.
 
     Args:
@@ -1106,6 +1109,40 @@ def drawController(songDetails, display, imageUrl):
     #save the image
     controllerImage.save("ImageCache/finalImage.png")
 
+def createWriteLock():
+    """
+    Create a lock file to avoid multiple instances of the program.
+    """
+    with open("src/songCheck.txt.lock", "w") as f:
+        f.close()
+
+def checkWriteLock():
+    """
+    Check if there is a lock file present.
+
+    Returns:
+        bool: True if the lock file is present, False otherwise.
+    """
+    return os.path.exists("src/songCheck.txt.lock")
+
+def searchConfig(albumCover):
+    """
+    Search for a configuration in the 'configs.txt' file based on the album cover.
+
+    Args:
+        albumCover (str): The URL of the album cover image.
+
+    Returns:
+        str: The configuration found in the file, or an empty string if not found.
+    """
+    #return a list of all the lines in the file that contain the album cover
+    dir = "src/savedConfigs"
+    images = []
+    for file in os.listdir(dir):
+        if file.startswith(albumCover):
+            images.append(file)
+
+    return images
 
 def changeWallpaper():
     """
@@ -1132,22 +1169,55 @@ def changeWallpaper():
             time.sleep(5)
             prev_status = "paused"
             continue
+
         if status == "playing" and prev_status == "paused":
             #if the song has been paused and then resumed, change the wallpaper
             prev_status = "playing"
             os.system(command + os.getcwd() + "/ImageCache/finalImage.png")
             time.sleep(5)
             continue
+
         if songId != checkSong() or modes != oldModes:
+            #create a lock file to avoid multiple instances of the program
+            createWriteLock()
             oldModes = modes
             # Download the image and get its local path
             download_image(imageUrl)
             #change the song title in the file
             with open("src/songCheck.txt", "w") as f:
                 f.write(songId)
+                f.write(",")
                 f.close()
-            #choose randomly between the different modes, and generate the wallpaper
-            mode = random.choice(modes)
+
+            #check if the configuration for the song is already saved
+            saved = searchConfig(songId)
+            print("DEBUG>>:", saved)
+            print("DEBUG>>:", len(saved))
+            if len(saved) > 0:
+                #choose randomly between the different configurations
+                config = random.choice(saved)
+                #copy the configuration to the ImageCache folder
+                os.system(f"cp src/savedConfigs/{config} ImageCache/finalImage.png")
+                #write the configuration to the file songCheck.txt
+                with open("src/songCheck.txt", "w") as f:
+                    f.write(songId)
+                    f.write(",")
+                    f.write(config.split("-")[1].split(".")[0])
+                    f.close()
+                #remove the lock file
+                os.remove("src/songCheck.txt.lock")
+
+                #change the wallpaper
+                os.system(command + os.getcwd() + "/ImageCache/finalImage.png")
+                time.sleep(1)
+                continue
+            
+            else:
+                #choose randomly between the different modes, and generate the wallpaper
+                mode = random.choice(modes)
+
+            print("DEBUG>>:", mode)
+
             if mode == "gradient":
                 gradient(songTitle, imageUrl, artistName)
             elif mode == "blurred":
@@ -1163,6 +1233,14 @@ def changeWallpaper():
                 drawController(song_details, display, imageUrl)
             #change the wallpaper                           
             os.system(command + os.getcwd() + "/ImageCache/finalImage.png")
+
+            #print on file the url of the cover image and the mode
+            with open("src/songCheck.txt", "a") as f:
+                f.write(mode)
+                f.close()
+            #remove the lock file
+            os.remove("src/songCheck.txt.lock")
+
         time.sleep(1)  
     
 
@@ -1206,6 +1284,28 @@ def modify_modes():
             continue
     input("Modes updated. Press Enter to continue...")
     
+def saveConfig():
+    """
+    Copy the current configuration to the 'savedConfigs' folder.
+    """
+    if checkWriteLock():
+        print("Configuration has not been saved yet.")
+        return False
+    #copy ImageCache/finalImage.png to src/savedConfigs/songID-MODE.png
+    with open("src/songCheck.txt", "r") as f:
+        lines = f.readlines()
+        f.close()
+    #get the album cover url
+    songID = lines[0].split(",")[0]
+    #get the mode
+    mode = lines[0].split(",")[1]
+    #copy the image
+    os.system(f"cp ImageCache/finalImage.png src/savedConfigs/{songID}-{mode}.png")
+
+
+
+    return True
+
 def cli():
     """
     Command Line Interface for the SpotifySyncWall program.
@@ -1227,6 +1327,7 @@ def cli():
             print("   help - Display a list of commands.")
             print("   exit - Exit the program.")
             print("   settings - Change the settings.")
+            print("   fav - Add this configuration to favorites. This will apply to every song with the same album cover.")
 
             #wait for the user to press enter
             input("\nPress Enter to continue...")
@@ -1246,6 +1347,14 @@ def cli():
             else:
                 print("Invalid setting.")
                 continue
+
+        if command == "fav":
+            if not saveConfig():
+                input("Press Enter to continue...")
+                continue
+            print("Configuration saved.")
+            input("Press Enter to continue...")
+            continue
 
 if __name__ == "__main__":
     try:
