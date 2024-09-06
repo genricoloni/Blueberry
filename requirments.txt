@@ -2,3 +2,6 @@ colorgram.py
 spotipy
 pillow
 cachetools
+beautifulsoup4
+gzip
+urllib
