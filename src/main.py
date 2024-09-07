@@ -51,6 +51,8 @@ def main():
     stop_event.set()
     wallpaper_thread.join()
 
+    handler.restoreWallpaper()
+
     print("Programma terminato")
 
 def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_event, modes, handler):
@@ -70,12 +72,13 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
             #print(f"Canzone precedente: {handler.previous_song()}, Stato precedente: {handler.previous_status()}")
 
             # if the song changed, or if the song was previously paused and now playing
-            if handler.previous_song() != song_details["songID"] or (handler.previous_status() == False and song_details["playing"] == True):
+            if handler.previous_status == False and song_details["playing"] == True:
                 handler.change_song(song_details["songID"])
                 handler.change_status(song_details["playing"])
-                wallpaper_generator.generate_wallpaper(random.choice(modes), song_details)
+                wallpaper_generator.generate_wallpaper(random.choice(modes), song_details, handler.favorites)
 
-                
+            if song_details["playing"] == False:
+                print("Canzone in pausa")
 
             
             # Tempo di attesa prima di aggiornare di nuovo il wallpaper

@@ -4,7 +4,25 @@ class Handler:
     def __init__(self):
         self.songID = None
         self.playing = False
+
+        self.availableEnvironment = [
+            {'envName': 'gnome',
+             'testCommand' : 'gnome-session',
+             'command' : 'gsettings set org.gnome.desktop.background picture-uri ' if ('dark' if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else 'light') == 'light' else 'gsettings set org.gnome.desktop.background picture-uri-dark ',
+             'wallpaperPath' : os.popen("gsettings get org.gnome.desktop.background picture-uri-dark").read() if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else os.popen("gsettings get org.gnome.desktop.background picture-uri").read()
+             }]
+        
         self.favorites = self.loadFavorites()
+        self.enviroment, self.command, self.originalWallpaper = self.getEnviroment()
+
+        print("original wallpaper: ", self.originalWallpaper)
+
+    def getEnviroment(self):
+        for env in self.availableEnvironment:
+            result = os.popen(env['testCommand']).read().strip()
+            if not result:
+                return env['envName'], env['command'], os.popen("gsettings get org.gnome.desktop.background picture-uri-dark").read() if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else os.popen("gsettings get org.gnome.desktop.background picture-uri").read()
+
 
     def previous_song(self):
         """
@@ -49,3 +67,9 @@ class Handler:
             favorites[albumID] = mode
 
         return favorites
+    
+    def restoreWallpaper(self):
+        """
+        Ripristina il wallpaper originale.
+        """
+        os.system(f"{self.command}{self.originalWallpaper}")
