@@ -7,115 +7,119 @@ def generate_gradient_image(colors, display, album_image_width, song_title, arti
     Generate a gradient image based on the colors of the album image.
     
     Args:
-        colors (list): A list of two color objects.
-        display (tuple): The dimensions of the display.
-        album_image_width (int): The width of the album image.
-        
-    Returns:
-        Image: A gradient image with the colors of the album image.
-    """
+        colors (list): A list of two color objects. Each color should have an RGB attribute.
+        display (tuple): A tuple containing the display's width and height (width, height).
+        album_image_width (int): The width of the album cover image.
+        song_title (str): The title of the current song.
+        artist_name (str): The name of the artist.
+        image (PIL.Image): The album cover image.
 
+    Returns:
+        None: The function saves the final image to the disk instead of returning it.
+    """
+    # Randomly decide between standard or centered gradient
     if random.choice([True, False]):
-        # standard gradient
+        # Generate standard gradient background
         bg = create_standard_gradient(colors, display)
-        text = generate_text_image(song_title, 
-                                   artist_name, 
-                                   colors,
-                                   display)
-    else:   
+        # Generate text to overlay on the gradient
+        text = generate_text_image(song_title, artist_name, colors, display)
+    else:
+        # Generate centered gradient background
         bg = create_centered_gradient(colors, display, album_image_width)
-        text = generate_text_image(song_title, 
-                artist_name, 
-                find_darkest_color(colors),
-                    display,
-                    positionX = 50,
-                    positionY = 50)
-        
+        # Generate text with the darkest color
+        text = generate_text_image(
+            song_title, artist_name, find_darkest_color(colors), display, positionX=50, positionY=50
+        )
+    
+    # Paste the album image and save the final image
     paste_and_save_album_image(bg, image, display, text)
 
 
 def create_standard_gradient(colors, display):
     """
-    Generate a gradient image based on the colors of the album image.
+    Create a vertical gradient image transitioning between two colors.
     
     Args:
-        colors (list): A list of two color objects.
-        display (tuple): The dimensions of the display.
+        colors (list): A list of two color objects with RGB values.
+        display (tuple): A tuple containing the display's width and height (width, height).
         
     Returns:
-        Image: A gradient image with the colors of the album image.
+        PIL.Image: The generated gradient image.
     """
-    # Create a gradient image with the colors of the album image
-    width = int(display[0])
-    height = int(display[1])
+    width, height = int(display[0]), int(display[1])
     gradient = Image.new('RGB', (width, height))
 
-    # Create a draw object
     draw = ImageDraw.Draw(gradient)
+    first_color, second_color = colors[0].rgb, colors[1].rgb
 
-    # The first color will be the first color of the album image
-    firstColor = colors[0].rgb
-    # The second color will be the second color of the album image
-    secondColor = colors[1].rgb
-
-    # Draw the gradient
+    # Draw vertical gradient by interpolating between the two colors
     for i in range(height):
-        draw.line((0, i, width, i), fill = (int(firstColor[0] + (secondColor[0] - firstColor[0]) * i / height), int(firstColor[1] + (secondColor[1] - firstColor[1]) * i / height), int(firstColor[2] + (secondColor[2] - firstColor[2]) * i / height)))
+        color = (
+            int(first_color[0] + (second_color[0] - first_color[0]) * i / height),
+            int(first_color[1] + (second_color[1] - first_color[1]) * i / height),
+            int(first_color[2] + (second_color[2] - first_color[2]) * i / height)
+        )
+        draw.line((0, i, width, i), fill=color)
 
     return gradient
+
 
 def create_centered_gradient(colors, display, album_image_width):
+    """
+    Create a radial gradient centered on the screen, with ellipses expanding outwards.
+    
+    Args:
+        colors (list): A list of two color objects with RGB values.
+        display (tuple): A tuple containing the display's width and height (width, height).
+        album_image_width (int): The width of the album cover image.
 
-    width = int(display[0])
-    height = int(display[1])
-
-    # determine the number of ellipses to draw
+    Returns:
+        PIL.Image: The generated centered gradient image.
+    """
+    width, height = int(display[0]), int(display[1])
     ellipses = 300
+    min_dim = min(width, height)
 
-    # Create a new image with the dimensions of the display
     gradient = Image.new('RGB', (width, height))
-
-    # Create a draw object
     draw = ImageDraw.Draw(gradient)
 
-    minDim = min(width, height)
-    maxDim = max(width, height)
-    # Calculate the optimal number of ellipses
-    ellipses = int(ellipses * (minDim / maxDim))
+    # Adjust the number of ellipses based on display dimensions
+    ellipses = int(ellipses * (min_dim / max(width, height)))
+    optimal_width = int(min_dim / ellipses) + 2
 
-    #find the optimal width for the ellipses to be drawn
-    optimalWidth = int(minDim / ellipses)+2
-
-    # Draw the ellipses
     for i in range(ellipses):
-        #skip all the ellipses that would be drawn inside the album image
-        if i / ellipses * min(width, height) < album_image_width/2:
+        if i / ellipses * min(width, height) < album_image_width / 2:
             continue
-        # Calculate the radius of the current ellipse
+
         radius = int((i / ellipses) * min(width, height))
-        # Calculate the color for the current ellipse
         color = calculate_gradient_color(radius, 0, min(width, height), colors)
-        # Draw the ellipse
-        draw.ellipse([(width / 2 - radius, height / 2 - radius), (width / 2 + radius, height / 2 + radius)], width=optimalWidth, outline=color)
+        draw.ellipse(
+            [(width / 2 - radius, height / 2 - radius), (width / 2 + radius, height / 2 + radius)],
+            width=optimal_width, outline=color
+        )
 
     return gradient
 
 
-def calculate_gradient_color(radius, startRadius, endRadius, colors):
+def calculate_gradient_color(radius, start_radius, end_radius, colors):
+    """
+    Calculate the interpolated color for the current position in the gradient.
 
-    position = (radius - startRadius) / (endRadius - startRadius)
-
+    Args:
+        radius (int): The current radius of the ellipse.
+        start_radius (int): The starting radius (typically 0).
+        end_radius (int): The maximum radius (typically the height or width of the display).
+        colors (list): A list of two color objects with RGB values.
+    
+    Returns:
+        tuple: A tuple representing the calculated RGB color at the given position.
+    """
+    position = (radius - start_radius) / (end_radius - start_radius)
     color = []
 
-    for i in range(3):
-        # Calculate the color value for the current position
-        colorValue = int(colors[0].rgb[i] + (colors[1].rgb[i] - colors[0].rgb[i]) * position)
-        # Ensure the color value is within the valid range
-        colorValue = max(0, min(255, colorValue))
-        # Update the color list with the new value
-        color.append(colorValue)
+    for i in range(3):  # Iterate over RGB channels
+        color_value = int(colors[0].rgb[i] + (colors[1].rgb[i] - colors[0].rgb[i]) * position)
+        color_value = max(0, min(255, color_value))  # Ensure the value is within 0-255
+        color.append(color_value)
 
-    #make a tuple with the color values
-    color = (color[0], color[1], color[2])
-
-    return color
+    return tuple(color)

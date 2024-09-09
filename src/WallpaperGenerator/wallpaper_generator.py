@@ -188,8 +188,6 @@ class WallpaperGenerator:
 
         cover_image = Image.open(io.BytesIO(self.cacheManager.get(song_details['imageUrl'])))
 
-        print("cover_image", cover_image.size)
-
         cbi(cover_image, self.display)
 
     def generate_waveform(self, spotify_client, song_details):

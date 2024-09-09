@@ -7,7 +7,7 @@ def create_controller_image(song_title, artist_name, image_url, colors, display,
     """
     Create a controller image based on the provided song details.
     
-    Args:
+    Args:remove
         song_title (str): The title of the song.
         artist_name (str): The name of the artist.
         image_url (str): The URL of the album image.
