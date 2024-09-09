@@ -12,10 +12,14 @@ def paste_and_save_album_image(bg, cover, display, text):
     """
 
     width = int(display[0])
-    height = int(display[1])
+    height = int(display[1])   
 
-    # Paste the album image, bigger of 120% of the size, in the center of the gradient image
-    bg.paste(cover, ((int(bg.width/2) - int(cover.width / 2)), int((bg.height/2) - int(cover.height / 2))))
+    # Calculate the center coordinates for pasting
+    center_x = int(width / 2 - cover.width / 2)
+    center_y = int(height / 2 - cover.height / 2)
+
+    # Paste the album image in the center
+    bg.paste(cover, (center_x, center_y))
     #save the final image
 
     background = Image.new('RGB', (width, height))

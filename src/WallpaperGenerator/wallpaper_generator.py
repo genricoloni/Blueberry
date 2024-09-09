@@ -126,6 +126,7 @@ class WallpaperGenerator:
 
         image = self.setup_album_image(self.display, image_url)
 
+
         csi(colors, self.display, image.width, song_title, artist_name, image)
 
 

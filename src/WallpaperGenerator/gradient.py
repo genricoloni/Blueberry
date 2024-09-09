@@ -14,6 +14,7 @@ def generate_gradient_image(colors, display, album_image_width, song_title, arti
     Returns:
         Image: A gradient image with the colors of the album image.
     """
+
     if random.choice([True, False]):
         # standard gradient
         bg = create_standard_gradient(colors, display)
@@ -22,9 +23,7 @@ def generate_gradient_image(colors, display, album_image_width, song_title, arti
                                    colors,
                                    display)
     else:   
-        bg = (find_darkest_color(colors), 
-                    display,
-                    image.width)
+        bg = create_centered_gradient(colors, display, album_image_width)
         text = generate_text_image(song_title, 
                 artist_name, 
                 find_darkest_color(colors),
@@ -65,7 +64,7 @@ def create_standard_gradient(colors, display):
 
     return gradient
 
-def create_gradient_wallpaper(colors, display, album_image_width):
+def create_centered_gradient(colors, display, album_image_width):
 
     width = int(display[0])
     height = int(display[1])
