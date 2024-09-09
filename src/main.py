@@ -99,7 +99,7 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
 
 
                 #DEBUG, should be removed
-                mode = "waveform"
+                mode = "controllerImage"
 
                 wallpaper_generator.set_current_mode(mode)
 
@@ -118,6 +118,10 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                 elif mode == "waveform":
                     # Create a waveform wallpaper
                     wallpaper_generator.generate_waveform(spotify_client, song_details)
+
+                elif mode == "controllerImage":
+                    # Create a controller image
+                    wallpaper_generator.generate_controller(song_details)
 
 
                 handler.setWallpaper()

@@ -16,6 +16,8 @@ from WallpaperGenerator.blurred import create_blurred_image as cbi
 
 from WallpaperGenerator.waveform import create_waveform_image as cwi
 
+from WallpaperGenerator.controller import create_controller_image as cci
+
 class WallpaperGenerator:
     """
     A class to manage the generation of wallpapers.
@@ -214,5 +216,26 @@ class WallpaperGenerator:
             self.get_colors(song_details['imageUrl']))
         
         
+    def generate_controller(self, song_details):
+        """
+        Generate a controller wallpaper based on the provided song details.
+
+        This method generates a controller wallpaper using the album artwork.
+
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
+        song_title = song_details['songTitle']
+        artist_name = song_details['artistName']
+        image_url = song_details['imageUrl']
+        song_length = song_details['songLength']
+        colors = self.get_colors(image_url)
 
 
+        album_image = self.setup_album_image(self.display, image_url)
+
+
+        cci(song_title, artist_name, image_url, colors, self.display, song_length, album_image)
+
+
+        
