@@ -60,6 +60,7 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
     """
     This thread periodically changes the wallpaper based on the music playing on Spotify.
     """
+    old_modes = modes
     while not stop_event.is_set():
         try:
             song_details = spotify_client.get_current_song()
@@ -82,9 +83,11 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                     handler.setWallpaper()
 
             # if the song changed, or if the song was previously paused and now playing
-            if  not handler.same_song(song_details["songID"]):
+            if  not handler.same_song(song_details["songID"]) or old_modes != modes:
                 handler.change_song(song_details["songID"])
                 handler.change_status(True)
+                old_modes = modes
+                wallpaper_generator.set_current_album(song_details["songID"])
 
                 if song_details["songID"] in handler.favorites:
                     # Apply the saved wallpaper
@@ -94,8 +97,11 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                 # Choose a random mode
                 mode = random.choice(modes)
 
+
                 #DEBUG, should be removed
-                mode = "blurred"
+                mode = "waveform"
+
+                wallpaper_generator.set_current_mode(mode)
 
                 if mode == "albumImage":
                     # Create an album image object
@@ -108,6 +114,10 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                 elif mode == "blurred":
                     # Create a blurred wallpaper
                     wallpaper_generator.generate_blurred(song_details)
+
+                elif mode == "waveform":
+                    # Create a waveform wallpaper
+                    wallpaper_generator.generate_waveform(song_details)
 
 
                 handler.setWallpaper()

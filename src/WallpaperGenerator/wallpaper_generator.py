@@ -33,7 +33,45 @@ class WallpaperGenerator:
         """
         self.display = os.popen("xrandr").read().split("\n")[2].split()[0].split("x")
         self.now_showing = None
+        self.current_mode = None
         self.cacheManager = cacheManager()
+        self.changedModes = False
+
+    def get_current_album(self):
+        """
+        Get the details of the currently playing song.
+
+        Returns:
+            dict: A dictionary containing details of the currently playing song (title, artist, image URL).
+        """
+        return self.now_showing
+    
+    def set_current_album(self, song_id):
+        """
+        Set the details of the currently playing song.
+
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
+        self.now_showing = song_id
+
+    def get_current_mode(self):
+        """
+        Get the current wallpaper mode.
+
+        Returns:
+            str: The current wallpaper mode.
+        """
+        return self.current_mode
+    
+    def set_current_mode(self, mode):
+        """
+        Set the current wallpaper mode.
+
+        Parameters:
+            mode (str): The new wallpaper mode.
+        """
+        self.current_mode = mode
 
     def get_colors(self, imageUrl):
         """

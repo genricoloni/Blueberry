@@ -52,6 +52,7 @@ class CLI:
 
             print("Welcome to the SpotifySyncWall CLI!")
             print("Type 'help' for a list of commands. \n")
+            #print("Now playing: ", self.wallpaper_generator.get_current_album()," in mode: ", self.wallpaper_generator.get_current_mode())
 
             command = input("Enter a command: ")
             print()
