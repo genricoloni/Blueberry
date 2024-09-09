@@ -117,7 +117,7 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
 
                 elif mode == "waveform":
                     # Create a waveform wallpaper
-                    wallpaper_generator.generate_waveform(song_details)
+                    wallpaper_generator.generate_waveform(spotify_client, song_details)
 
 
                 handler.setWallpaper()

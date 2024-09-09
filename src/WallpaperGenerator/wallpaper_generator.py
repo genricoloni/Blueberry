@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 import colorgram
 import random
+import spotify
 
 import utils.images as images
 
@@ -12,6 +13,8 @@ from WallpaperGenerator.album_image import create_album_image as cai
 from WallpaperGenerator.gradient import generate_gradient_image as csi
 
 from WallpaperGenerator.blurred import create_blurred_image as cbi
+
+from WallpaperGenerator.waveform import create_waveform_image as cwi
 
 class WallpaperGenerator:
     """
@@ -187,9 +190,29 @@ class WallpaperGenerator:
 
         cbi(cover_image, self.display)
 
+    def generate_waveform(self, spotify_client, song_details):
+        """
+        Generate a waveform wallpaper based on the provided song details.
 
+        This method generates a waveform wallpaper using the album artwork.
 
-            
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
+        
+        audio_analysis = spotify_client.get_audio_analysis(song_details['songID'])
 
+        if not audio_analysis:
+            return
+        
+
+        cwi(audio_analysis, 
+            self.display, 
+            self.cacheManager.get(song_details['imageUrl']),
+            song_details['artistName'],
+            song_details['songTitle'],
+            self.get_colors(song_details['imageUrl']))
+        
+        
 
 

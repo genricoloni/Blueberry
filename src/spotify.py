@@ -105,3 +105,30 @@ class SpotifyClient:
             except Exception as e:
                 print(f"Error while getting current song: {e}")
                 continue
+
+
+    def get_audio_analysis(self, song_id):
+        """SavedCo
+        Get the audio analysis for a song from the Spotify API.
+
+        Args:
+            song_id (str): The ID of the song.
+
+        Returns:
+            dict or None: A dictionary with the audio analysis data, or None if the request fails.
+        """
+
+
+        url = f"https://api.spotify.com/v1/audio-analysis/{song_id}"
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.token}"
+        }
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+
+            print("Error during request")
+            return None
