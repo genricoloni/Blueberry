@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 import colorgram
 import random
-import spotify
+import utils.spotify
 
 import utils.images as images
 
