@@ -53,6 +53,7 @@ def main():
 
     handler.restoreWallpaper()
 
+
     print("Program terminated")
 
 def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_event, modes, handler):
@@ -80,12 +81,19 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                 # Choose a random mode
                 mode = random.choice(modes)
 
+                #DEBUG, should be removed
+                mode = "gradient"
+
                 if mode == "albumImage":
                     # Create an album image object
                     wallpaper_generator.generate_album_image(song_details)
-                    # Delete the instance once the image is created
+
+                elif mode == "gradient":
+                    # Create a gradient wallpaper
+                    wallpaper_generator.generate_gradient(song_details)
 
 
+                handler.setWallpaper()
 
             if song_details["playing"] == False:
                 print("Song is paused")

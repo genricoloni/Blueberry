@@ -73,3 +73,10 @@ class Handler:
         Ripristina il wallpaper originale.
         """
         os.system(f"{self.command}{self.originalWallpaper}")
+
+    def setWallpaper(self):
+        """
+        Imposta il wallpaper.
+        """
+        os.system(f"{self.command}" + os.path.abspath("ImageCache/finalImage.png"))
+        

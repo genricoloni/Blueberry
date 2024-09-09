@@ -3,8 +3,14 @@ from utils.cache import cacheManager
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 import colorgram
+import random
+
+import utils.images as images
 
 from WallpaperGenerator.album_image import create_album_image as cai
+
+from WallpaperGenerator.gradient import generate_gradient_image as csi
+
 
 class WallpaperGenerator:
     """
@@ -27,30 +33,6 @@ class WallpaperGenerator:
         self.display = os.popen("xrandr").read().split("\n")[2].split()[0].split("x")
         self.now_showing = None
         self.cacheManager = cacheManager()
-
-    def generate_album_image(self, song_details):
-        """
-        Generate an album image based on the provided song details.
-
-        If the song is different from the currently displayed song, this method retrieves
-        the album artwork, extracts colors, and creates a wallpaper image.
-
-        Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
-        """
-        if song_details == self.now_showing:
-            return
-
-        self.now_showing = song_details
-        song_title = song_details['songTitle']
-        artist_name = song_details['artistName']
-        image_url = song_details['imageUrl']
-        colors = self.get_colors(image_url)
-
-        image = self.setup_album_image(self.display, song_details['imageUrl'])
-        text = generate_text_image(song_title, artist_name, colors, self.display)
-
-        cai(self.display, image, text, colors)
 
     def get_colors(self, imageUrl):
         """
@@ -99,83 +81,60 @@ class WallpaperGenerator:
 
         return image.resize((width, hsize), Image.LANCZOS) 
 
+    def generate_album_image(self, song_details):
+        """
+        Generate an album image based on the provided song details.
 
-def generate_text_image(songTitle, artistName, colors, display, positionX=50, positionY=50):
-    """
-    Generate a text image containing the song title and artist name.
+        If the song is different from the currently displayed song, this method retrieves
+        the album artwork, extracts colors, and creates a wallpaper image.
 
-    This function creates an image with the song title and artist name rendered onto it.
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
+        if song_details == self.now_showing:
+            return
 
-    Parameters:
-        songTitle (str): The title of the song.
-        artistName (str): The name of the artist.
-        colors (list): A list of colors to use for the text.
-        display (list): The dimensions of the display.
-        positionX (int, optional): The x-coordinate of the text. Defaults to 50.
-        positionY (int, optional): The y-coordinate of the text. Defaults to 50.
+        self.now_showing = song_details
+        song_title = song_details['songTitle']
+        artist_name = song_details['artistName']
+        image_url = song_details['imageUrl']
+        colors = self.get_colors(image_url)
 
-    Returns:
-        Image: A new image with the song title and artist name.
-    """
-    width = int(display[0])
-    height = int(display[1])
+        image = self.setup_album_image(self.display, song_details['imageUrl'])
+        text = images.generate_text_image(song_title, artist_name, colors, self.display)
 
-    textColor = colors[0].rgb
-
-    # Adjust text color to ensure contrast
-    if (textColor[0] * 0.299 + textColor[1] * 0.587 + textColor[2] * 0.114) > 186:
-        textColor = (0, 0, 0)  # Black text for light backgrounds
-    else:
-        textColor = (255, 255, 255)  # White text for dark backgrounds
-
-    # Create a new transparent image for the text
-    text = Image.new('RGBA', (width, height), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(text)
-
-    # Set font and draw the text
-    myFont = ImageFont.truetype("./fonts/Rubik.ttf", 40)
-    draw.text((positionX, positionY), (songTitle + "\n" + artistName), font=myFont, fill=textColor)
-
-    return text
+        cai(self.display, image, text, colors)
 
 
-def calculate_contrast_ratio(color1, color2):
-    """
-    Calculate the contrast ratio between two colors.
+    def generate_gradient(self, song_details):
+        """
+        Generate a gradient wallpaper based on the provided song details.
 
-    The contrast ratio is calculated using the formula:
-    (L1 + 0.05) / (L2 + 0.05), where L1 and L2 are the relative luminances
-    of the two colors.
+        This method generates a gradient wallpaper using the extracted colors from the album artwork.
 
-    Parameters:
-        color1 (Color): The first color.
-        color2 (Color): The second color.
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
+        if song_details == self.now_showing:
+            return
 
-    Returns:
-        float: The contrast ratio between the two colors.
-    """
-    luminance1 = calculate_relative_luminance(color1)
-    luminance2 = calculate_relative_luminance(color2)
+        self.now_showing = song_details
+        song_title = song_details['songTitle']
+        artist_name = song_details['artistName']
+        image_url = song_details['imageUrl']
+        colors = self.get_colors(image_url)
 
-    # Ensure luminance1 is the higher value
-    if luminance2 > luminance1:
-        luminance1, luminance2 = luminance2, luminance1
+        image = self.setup_album_image(self.display, image_url)
 
-    return (luminance1 + 0.05) / (luminance2 + 0.05)
+        csi(colors, self.display, image.width, song_title, artist_name, image)
 
 
-def calculate_relative_luminance(color):
-    """
-    Calculate the relative luminance of a color.
 
-    The luminance is calculated using the formula:
-    L = 0.2126 * R + 0.7152 * G + 0.0722 * B
 
-    Parameters:
-        color (Color): The color object to calculate luminance for.
 
-    Returns:
-        float: The relative luminance of the color.
-    """
-    r, g, b = color.rgb
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+            
+
+
+
