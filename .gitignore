@@ -5,3 +5,4 @@ creds.txt
 /env
 /src/savedConfigs/*
 ssw_env
+/*/__pycache__/

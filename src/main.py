@@ -9,107 +9,98 @@ from config import ConfigManager
 from utils.handler import Handler
 
 def main():
-    # Inizializza la configurazione
+    # Initialize configuration
     config_manager = ConfigManager('creds.txt')
     
-    # Inizializza il client Spotify
+    # Initialize Spotify client
     spotify_client = SpotifyClient(
         client_id=config_manager.get('client_id'),
         client_secret=config_manager.get('client_secret'),
         username=config_manager.get('spot_username'),
     )
 
-    # Inizializza il generatore di wallpaper
+    # Initialize wallpaper generator
     wallpaper_generator = WallpaperGenerator()
 
     handler = Handler()
 
-    # Flag per comunicare tra i thread
-    stop_event = threading.Event()  # Segnala al thread di fermarsi
-    modes = ["gradient", "blurred", "waveform", "albumImage", "controllerImage"]  # Modalità correnti
+    # Flag for thread communication
+    stop_event = threading.Event()  # Signal for the thread to stop
+    modes = ["gradient", "blurred", "waveform", "albumImage", "controllerImage"]  # Current modes
 
-    # Thread per il monitoraggio della musica e la generazione del wallpaper
+    # Thread for monitoring music and generating wallpaper
     wallpaper_thread = threading.Thread(
         target=change_wallpaper_periodically,
         args=(spotify_client, wallpaper_generator, stop_event, modes, handler)
     )
 
-    # Thread per la CLI
+    # Thread for the CLI
     cli_thread = threading.Thread(
         target=start_cli,
         args=(spotify_client, wallpaper_generator, stop_event, modes)
     )
 
-    # Avvia entrambi i thread
+    # Start both threads
     wallpaper_thread.start()
     cli_thread.start()
 
-    # Attendi che il thread della CLI finisca
+    # Wait for the CLI thread to finish
     cli_thread.join()
 
-    # Una volta terminata la CLI, segnala al thread del wallpaper di fermarsi
+    # Once the CLI is done, signal the wallpaper thread to stop
     stop_event.set()
     wallpaper_thread.join()
 
     handler.restoreWallpaper()
 
-    print("Programma terminato")
+    print("Program terminated")
 
 def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_event, modes, handler):
     """
-    Questo thread cambia il wallpaper periodicamente basandosi sulla musica in riproduzione su Spotify.
+    This thread periodically changes the wallpaper based on the music playing on Spotify.
     """
     while not stop_event.is_set():
         try:
             song_details = spotify_client.get_current_song()
             if not song_details:
-                print("Nessuna canzone in riproduzione")
+                print("No song is playing")
                 time.sleep(1)
                 continue
-
-            print(f"Canzone corrente: {song_details}")
-
-            #print(f"Canzone precedente: {handler.previous_song()}, Stato precedente: {handler.previous_status()}")
 
             # if the song changed, or if the song was previously paused and now playing
             if handler.previous_status == False and song_details["playing"] == True or handler.previous_song != song_details["songID"]:
                 handler.change_song(song_details["songID"])
                 handler.change_status(song_details["playing"])
 
-                print("Canzone cambiata")
-                
                 if song_details["songID"] in handler.favorites:
-                    print("Configurazione trovata per questa canzone.")
-
-
-                    # Applica il wallpaper salvato
+                    # Apply the saved wallpaper
 
                     continue
 
-                # Scegli una modalità a caso
+                # Choose a random mode
                 mode = random.choice(modes)
 
                 if mode == "albumImage":
-                    #create an album image object
+                    # Create an album image object
                     wallpaper_generator.generate_album_image(song_details)
-                    #delete the instance once the image is created
+                    # Delete the instance once the image is created
 
 
 
             if song_details["playing"] == False:
-                print("Canzone in pausa")
+                print("Song is paused")
 
             
-            # Tempo di attesa prima di aggiornare di nuovo il wallpaper
+            # Wait time before updating the wallpaper again
             time.sleep(1)
-            #os.system("clear")
+            # os.system("clear")
         except Exception as e:
-            print(f"Errore nella generazione del wallpaper: {e}")
+            print(f"Error generating wallpaper: {e}")
             exit()
 
 def start_cli(spotify_client, wallpaper_generator, stop_event, modes):
     """
-    Questo thread gestisce la CLI per cambiare le impostazioni e controllare il programma.
+    This thread handles the CLI for changing settings and controlling the program.
     """
     cli = CLI(spotify_client, wallpaper_generator, modes, stop_event)
     cli.run()
