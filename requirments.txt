@@ -1,7 +1,10 @@
-colorgram.py
-spotipy
-pillow
-cachetools
-beautifulsoup4
-gzip
-urllib
+cachetools==5.5.0
+certifi==2024.8.30
+charset-normalizer==3.3.2
+colorgram.py==1.2.0
+idna==3.8
+pillow==10.4.0
+redis==5.0.8
+requests==2.32.3
+spotipy==2.24.0
+urllib3==2.2.2

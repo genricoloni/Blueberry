@@ -1,0 +1,7 @@
+.c*
+creds.txt
+/ImageCache/*
+/src/songCheck.txt
+/env
+/src/savedConfigs/*
+ssw_env

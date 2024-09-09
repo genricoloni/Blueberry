@@ -7,6 +7,8 @@ class CLI:
         self.modes = modes
         self.stop_event = stop_event
 
+
+
     def run(self):
         """
         Command Line Interface for the SpotifySyncWall program.

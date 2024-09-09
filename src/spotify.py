@@ -13,7 +13,6 @@ class SpotifyClient:
         self.username = username
         self.scope = "user-read-currently-playing"
         self.token = None
-        self.cache = TTLCache(maxsize=100, ttl=3600)
         self.maxTries = 3
         self.retryDelay = 5
         self.authenticate()
@@ -56,7 +55,7 @@ class SpotifyClient:
                     songLength = item.get("duration_ms")
 
                     data = {
-                        "name": name,
+                        "songTitle": name,
                         "artistName": artistName,
                         "imageUrl": imageUrl,
                         "songID": songID,

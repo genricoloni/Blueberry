@@ -67,15 +67,34 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                 time.sleep(1)
                 continue
 
-            #print(f"Canzone corrente: {song_details['name']} - {song_details['artistName']}")
+            print(f"Canzone corrente: {song_details}")
 
             #print(f"Canzone precedente: {handler.previous_song()}, Stato precedente: {handler.previous_status()}")
 
             # if the song changed, or if the song was previously paused and now playing
-            if handler.previous_status == False and song_details["playing"] == True:
+            if handler.previous_status == False and song_details["playing"] == True or handler.previous_song != song_details["songID"]:
                 handler.change_song(song_details["songID"])
                 handler.change_status(song_details["playing"])
-                wallpaper_generator.generate_wallpaper(random.choice(modes), song_details, handler.favorites)
+
+                print("Canzone cambiata")
+                
+                if song_details["songID"] in handler.favorites:
+                    print("Configurazione trovata per questa canzone.")
+
+
+                    # Applica il wallpaper salvato
+
+                    continue
+
+                # Scegli una modalità a caso
+                mode = random.choice(modes)
+
+                if mode == "albumImage":
+                    #create an album image object
+                    wallpaper_generator.generate_album_image(song_details)
+                    #delete the instance once the image is created
+
+
 
             if song_details["playing"] == False:
                 print("Canzone in pausa")
