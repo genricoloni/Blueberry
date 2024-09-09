@@ -99,11 +99,7 @@ class SpotifyClient:
                     }
 
                     # Check if all data values are valid
-                    if all(data.values()):
-                        return data
-                    else:
-                        time.sleep(self.retryDelay)
-                        continue
+                    return data
                 else:
                     return None
             except Exception as e:

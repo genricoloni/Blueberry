@@ -13,11 +13,11 @@ class Handler:
              }]
         
         self.favorites = self.loadFavorites()
-        self.enviroment, self.command, self.originalWallpaper = self.getEnviroment()
+        self.enviroment, self.command, self.originalWallpaper = self.getEnvironment()
 
         print("original wallpaper: ", self.originalWallpaper)
 
-    def getEnviroment(self):
+    def getEnvironment(self):
         for env in self.availableEnvironment:
             result = os.popen(env['testCommand']).read().strip()
             if not result:
@@ -30,9 +30,9 @@ class Handler:
         """
         return self.songID
     
-    def previous_status(self):
+    def is_paused(self):
         """
-        Controlla se la canzone è in riproduzione.
+        Controlla se la canzone è in pausa.
         """
         return self.playing
     
@@ -47,6 +47,12 @@ class Handler:
         Cambia lo stato della canzone.
         """
         self.playing = status
+
+    def set_paused(self):
+        """
+        Imposta la canzone in pausa.
+        """
+        self.playing = "False"
 
     def loadFavorites(self):
         """
@@ -79,4 +85,9 @@ class Handler:
         Imposta il wallpaper.
         """
         os.system(f"{self.command}" + os.path.abspath("ImageCache/finalImage.png"))
-        
+
+    def same_song(self, songID):
+        """
+        Controlla se la canzone è la stessa.
+        """
+        return self.songID == songID

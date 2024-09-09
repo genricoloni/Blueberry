@@ -63,15 +63,28 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
     while not stop_event.is_set():
         try:
             song_details = spotify_client.get_current_song()
-            if not song_details:
-                print("No song is playing")
+
+            if not song_details or song_details["playing"] == False:
+                handler.restoreWallpaper()
+                handler.change_status(False)
+
                 time.sleep(1)
                 continue
 
+            if song_details["playing"] == False:
+                time.sleep(1)
+                continue
+
+            if handler.is_paused() == False and song_details["playing"]:
+                handler.change_status(True)
+                if handler.same_song(song_details["songID"]):
+                    handler.change_song(song_details["songID"])
+                    handler.setWallpaper()
+
             # if the song changed, or if the song was previously paused and now playing
-            if handler.previous_status == False and song_details["playing"] == True or handler.previous_song != song_details["songID"]:
+            if  not handler.same_song(song_details["songID"]):
                 handler.change_song(song_details["songID"])
-                handler.change_status(song_details["playing"])
+                handler.change_status(True)
 
                 if song_details["songID"] in handler.favorites:
                     # Apply the saved wallpaper
@@ -82,7 +95,7 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                 mode = random.choice(modes)
 
                 #DEBUG, should be removed
-                mode = "gradient"
+                mode = "blurred"
 
                 if mode == "albumImage":
                     # Create an album image object
@@ -92,11 +105,14 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                     # Create a gradient wallpaper
                     wallpaper_generator.generate_gradient(song_details)
 
+                elif mode == "blurred":
+                    # Create a blurred wallpaper
+                    wallpaper_generator.generate_blurred(song_details)
+
 
                 handler.setWallpaper()
 
-            if song_details["playing"] == False:
-                print("Song is paused")
+
 
             
             # Wait time before updating the wallpaper again

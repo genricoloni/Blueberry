@@ -128,3 +128,31 @@ def find_darkest_color(colors):
         return [colors[0], colors[1]]
     else:
         return [colors[1], colors[0]]
+
+def resize_and_center_image(image, target_width, target_height):
+    """
+    Resizes an image to a target width, and centers it vertically.
+
+    Args:
+        image (Image): The image to resize.
+        target_width (int): The target width of the image.
+        target_height (int): The target height of the image.
+
+    Returns:
+        Image: The resized and centered image.
+    """
+    # Resize with preserved aspect ratio
+    aspect_ratio = image.width / image.height
+    new_height = target_height
+    new_width = int(int(aspect_ratio) * int(new_height))
+    resized_image = image.resize((int(new_width), int(new_height)), Image.LANCZOS)
+
+    target_width = int(target_width)
+    # Center the image vertically
+    if new_width > target_width:
+        x_offset = (new_width - target_width) // 2
+        resized_and_centered_image = resized_image.crop((x_offset, 0, x_offset + target_width, new_height))
+    else:
+        resized_and_centered_image = resized_image
+
+    return resized_and_centered_image

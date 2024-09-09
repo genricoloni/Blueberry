@@ -11,6 +11,7 @@ from WallpaperGenerator.album_image import create_album_image as cai
 
 from WallpaperGenerator.gradient import generate_gradient_image as csi
 
+from WallpaperGenerator.blurred import create_blurred_image as cbi
 
 class WallpaperGenerator:
     """
@@ -129,9 +130,24 @@ class WallpaperGenerator:
 
         csi(colors, self.display, image.width, song_title, artist_name, image)
 
+    def generate_blurred(self, song_details):
+        """
+        Generate a blurred wallpaper based on the provided song details.
 
+        This method generates a blurred wallpaper using the album artwork.
 
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
 
+        if song_details == self.now_showing:
+            return
+
+        cover_image = Image.open(io.BytesIO(self.cacheManager.get(song_details['imageUrl'])))
+
+        print("cover_image", cover_image.size)
+
+        cbi(cover_image, self.display)
 
 
 
