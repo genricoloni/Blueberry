@@ -64,6 +64,7 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
     while not stop_event.is_set():
         try:
             song_details = spotify_client.get_current_song()
+            handler.loadFavorites()
 
             if not song_details or song_details["playing"] == False:
                 handler.restoreWallpaper()
@@ -90,16 +91,15 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                 wallpaper_generator.set_current_album(song_details["songID"])
 
                 if song_details["songID"] in handler.favorites:
-                    # Apply the saved wallpaper
-
+                    #choose from the favorites with the same albumID
+                    path = f"src/savedConfigs/{song_details['songID']}-{handler.favorites[song_details['songID']]}.png"
+                    handler.setWallpaper(path)
+                    
+                    time.sleep(1)
                     continue
 
                 # Choose a random mode
                 mode = random.choice(modes)
-
-
-                #DEBUG, should be removed
-                mode = "controllerImage"
 
                 wallpaper_generator.set_current_mode(mode)
 

@@ -48,7 +48,7 @@ class CLI:
         """
         while True:
             # Clear the screen (optional, depends on environment support)
-            # os.system("clear")
+            os.system("clear")
 
             print("Welcome to the SpotifySyncWall CLI!")
             print("Type 'help' for a list of commands. \n")
@@ -150,16 +150,13 @@ class CLI:
             True if the configuration was saved successfully, False otherwise.
         """
         try:
-            # Open the songCheck.txt file to read the song ID and mode.
-            with open("src/songCheck.txt", "r") as f:
-                lines = f.readlines()
+            #get the current song ID and mode
+            songID = self.wallpaper_generator.get_current_album()
+            mode = self.wallpaper_generator.get_current_mode()
 
-            # Get the album cover URL
-            songID, mode = lines[0].strip(), lines[1].strip()
-
-            # Copy the final image from the cache to the savedConfigs folder
+            #copy the current wallpaper to the savedConfigs folder
             os.system(f"cp ImageCache/finalImage.png src/savedConfigs/{songID}-{mode}.png")
             return True
         except Exception as e:
-            print(f"Failed to save configuration: {e}")
+            print(f"Error saving configuration: {e}")
             return False
