@@ -4,6 +4,8 @@
 
  Once you stop the script, the wallpaper will be reset to the default one.
 
+ NOTE: if you wanna contribute, please, read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+
 ## Images
 
 There are 5 modes: Album Cover, Gradient (up-down and center-out), Blurred, Waveform and Controller. From now, you can choose which one to use by setting them using the `settings` command in the CLI. Here are some examples:
@@ -54,7 +56,11 @@ spot_username = your_spotify_username
 
 ### Note on display dimension
 
- Script automatically retrieve display dimension, using the first available in `xrandr`: if you want to use a custom one, change the second index in line 73, or removing the comment that line and adding your favorite resolution, following the already written pattern.
+Script automatically retrieve display dimension, using the first available in `xrandr`: if your system doesn't have `xrandr` installed, you can:
+
+- Install it
+- Modify the command the `WallpaperGenerator/wallpaper_generator.py` file, line `39`, by adjusting the line with your preferred command to get the display dimension
+- Manually set the display dimension in the `WallpaperGenerator/wallpaper_generator.py` file, changing the line `39` with your display dimension. For example, if your display is 1920x1080, you should change the line with `self.display = (1920, 1080)` or `self.display = ("1920", "1080")`.
 
 ## TODO
 
@@ -73,7 +79,7 @@ spot_username = your_spotify_username
 
 ### Long term
 
-- [ ] General optimization of the code
+- [ ] ~~General optimization of the code~~
 - [ ] Add a GUI (too far from now, I think)
 - [ ] Compatibility with other desktop environments (same as above)
 - [ ] Convert the script in a GNOME extension
