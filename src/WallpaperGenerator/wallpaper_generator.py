@@ -18,6 +18,8 @@ from WallpaperGenerator.waveform import create_waveform_image as cwi
 
 from WallpaperGenerator.controller import create_controller_image as cci
 
+from WallpaperGenerator.lyric_card import create_lyric_image as cli
+
 class WallpaperGenerator:
     """
     A class to manage the generation of wallpapers.
@@ -235,5 +237,21 @@ class WallpaperGenerator:
 
         cci(song_title, artist_name, image_url, colors, self.display, song_length, album_image)
 
+    def generate_lyric(self, song_details):
+        """
+        Generate a lyric card wallpaper based on the provided song details.
 
-        
+        This method generates a lyric card wallpaper using the album artwork.
+
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
+        song_title = song_details['songTitle']
+        artist_name = song_details['artistName']
+        image_url = song_details['imageUrl']
+        colors = self.get_colors(image_url)
+
+        cover_image = self.setup_album_image(self.display, image_url)
+
+
+        cli(self.display, artist_name, song_title, colors, cover_image)

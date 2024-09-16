@@ -104,13 +104,22 @@ class LyricFinderClient:
         
         # The first song is usually the most relevant
         song = songs[0]
-        print(f"Trovata canzone: {song['title']} di {song['artist_names']}")
-        
-        print(f"URL: {song['url']}")
+
+
+        #if there's 'Genius' in song['primary_artist']['name']}, skip it
+        for s in songs:
+            artist = str(s['primary_artist']['name'])
+            if 'Genius' in artist:
+                continue
+            else:
+                song = s
+                break
+
         # Retrieve the lyrics of the song
         lyric = self.retrieve_lyric(song["url"])
 
         if lyric:
+            #salva il testo in un file txt
             return lyric
         else:
             print("Testo non trovato.")
@@ -119,32 +128,39 @@ class LyricFinderClient:
     def find_most_relevant_part(self, lyric):
         """Trova la parte più rilevante del testo basata sul chorus escludendo altre sezioni."""
         # Regex per estrarre il testo tra [Chorus] e la prossima sezione, doppio a capo, o fine del testo
-        chorus_pattern = re.compile(r'\[Chorus.*?\](.*?)(?:\[(?!Chorus).*?\]|\n\n|$)', re.IGNORECASE | re.DOTALL)
+        chorus_pattern = re.compile(r'\[Chorus[^\]]*?\](.*?)(?=\[|\n\n|$)', re.IGNORECASE | re.DOTALL)
         
         match = chorus_pattern.search(lyric)
         if match:
             chorus_lyrics = match.group(1).strip()
-            return chorus_lyrics
+
+            print(chorus_lyrics)
+
+            return self.reduce_if_double(chorus_lyrics)
         
         # Se non trova un chorus, cerca per "Bridge"
         bridge_pattern = re.compile(r'\[Bridge.*?\](.*?)(?:\[(?!Bridge).*?\]|\n\n|$)', re.IGNORECASE | re.DOTALL)
         bridge_match = bridge_pattern.search(lyric)
         if bridge_match:
             bridge_lyrics = bridge_match.group(1).strip()
-            return bridge_lyrics
+            
+
+            return self.reduce_if_double(bridge_lyrics)
         
         # Se non trova un bridge, cerca per "Verse"
         verse_pattern = re.compile(r'\[Verse.*?\](.*?)(?:\[(?!Verse).*?\]|\n\n|$)', re.IGNORECASE | re.DOTALL)
         verse_match = verse_pattern.search(lyric)
         if verse_match:
             verse_lyrics = verse_match.group(1).strip()
-            return verse_lyrics
+
+            return self.reduce_if_double(verse_lyrics)
         
         # Se non trova un verso, restituisce le due sezioni più ripetute come potenziali ritornelli
         repeated_section = self.find_repeated_section(lyric)
         if repeated_section:
-            return repeated_section
-        
+
+            return self.reduce_if_double(repeated_section)
+                
         return None
 
 
@@ -171,23 +187,41 @@ class LyricFinderClient:
         else:
             return None
 
+    def reduce_if_double(self, lyric):
+        """Riduce il testo se contiene due sezioni uguali."""
+        # Trova il numero di righe
+        lines = lyric.split('\n')
+
+        if len(lines) < 2 or len(lines) % 2 != 0:
+            return lyric
+
+        # Trova la lunghezza della metà del testo
+        half_length = len(lines) // 2
+
+        
+        # Controlla se le due metà sono uguali
+        for i in range(half_length):
+            if lines[i] != lines[i + half_length]:
+                return lyric
+            
+        # Se le due metà sono uguali, riduci il testo alla metà
+        return '\n'.join(lines[:half_length])
+    
+
+
     def close(self):
         """Close the client's session."""
         self.session.close()
 
-if __name__ == "__main__":
-    client = LyricFinderClient()
-    query = "Ronald Falling"
-    lyric = client.get_lyric(query)
 
-
-    
+def main():
+    lf = LyricFinderClient()
+    lyric = lf.get_lyric("")
     if lyric:
+        #print("Lyric found:", lyric)
+        print("Most relevant part:", lf.find_most_relevant_part(lyric))
+    lf.close()
 
-        relevant_part = client.find_most_relevant_part(lyric)
-        if relevant_part:
-            print(f"Parte più rilevante:\n{relevant_part}")
-        else:
-            print("Non è stato trovato un ritornello o una parte rilevante.")
-
-        
+if __name__ == "__main__":
+    print("Esecuzione del modulo come script")
+    main()

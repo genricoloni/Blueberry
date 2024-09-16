@@ -48,7 +48,7 @@ class CLI:
         """
         while True:
             # Clear the screen (optional, depends on environment support)
-            os.system("clear")
+            #os.system("clear")
 
             print("Welcome to the SpotifySyncWall CLI!")
             print("Type 'help' for a list of commands. \n")

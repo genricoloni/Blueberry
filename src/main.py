@@ -33,7 +33,7 @@ def main():
 
     # Flag for thread communication
     stop_event = threading.Event()  # Signal for the thread to stop
-    modes = ["gradient", "blurred", "waveform", "albumImage", "controllerImage"]  # Current modes
+    modes = ["gradient", "blurred", "waveform", "albumImage", "controllerImage", "lyric"]  # Current modes
 
     # Thread for monitoring music and generating wallpaper
     wallpaper_thread = threading.Thread(
@@ -139,6 +139,11 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                     # Create a controller image
                     wallpaper_generator.generate_controller(song_details)
 
+                elif mode == "lyric":
+                    # Create a lyric wallpaper
+
+                    wallpaper_generator.generate_lyric(song_details)
+                    
                 handler.setWallpaper()
 
             # Wait time before updating the wallpaper again

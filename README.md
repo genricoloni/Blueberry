@@ -8,7 +8,7 @@
 
 ## Images
 
-There are 5 modes: Album Cover, Gradient (up-down and center-out), Blurred, Waveform and Controller. From now, you can choose which one to use by setting them using the `settings` command in the CLI. Here are some examples:
+There are 6 modes: Album Cover, Gradient (up-down and center-out), Blurred, Waveform, Controller and Lyric card. From now, you can choose which one to use by setting them using the `settings` command in the CLI. Here are some examples:
 
 ![Album Cover mode](src/img/AlbumCover.png)
 
@@ -21,6 +21,8 @@ There are 5 modes: Album Cover, Gradient (up-down and center-out), Blurred, Wave
 ![Gradient mode from the center](src/img/centeredGradient.png)
 
 ![Controller mode](src/img/controller.png)
+
+![Lyric card mode](src/img/lyric_card.png)
 
 ## Usage
 
