@@ -119,31 +119,31 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
 
                 wallpaper_generator.set_current_mode(mode)
 
-                if mode == "albumImage":
-                    # Create an album image object
-                    wallpaper_generator.generate_album_image(song_details)
+                match mode:
+                    case "albumImage":
+                        # Create an album image object
+                        wallpaper_generator.generate_album_image(song_details)
 
-                elif mode == "gradient":
-                    # Create a gradient wallpaper
-                    wallpaper_generator.generate_gradient(song_details)
+                    case "gradient":
+                        # Create a gradient wallpaper
+                        wallpaper_generator.generate_gradient(song_details)
 
-                elif mode == "blurred":
-                    # Create a blurred wallpaper
-                    wallpaper_generator.generate_blurred(song_details)
+                    case "blurred":
+                        # Create a blurred wallpaper
+                        wallpaper_generator.generate_blurred(song_details)
 
-                elif mode == "waveform":
-                    # Create a waveform wallpaper
-                    wallpaper_generator.generate_waveform(spotify_client, song_details)
+                    case "waveform":
+                        # Create a waveform wallpaper
+                        wallpaper_generator.generate_waveform(spotify_client, song_details)
 
-                elif mode == "controllerImage":
-                    # Create a controller image
-                    wallpaper_generator.generate_controller(song_details)
+                    case "controllerImage":
+                        # Create a controller image
+                        wallpaper_generator.generate_controller(song_details)
 
-                elif mode == "lyric":
-                    # Create a lyric wallpaper
+                    case "lyric":
+                        # Create a lyric wallpaper
+                        wallpaper_generator.generate_lyric(song_details)
 
-                    wallpaper_generator.generate_lyric(song_details)
-                    
                 handler.setWallpaper()
 
             # Wait time before updating the wallpaper again

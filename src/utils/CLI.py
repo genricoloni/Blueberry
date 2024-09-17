@@ -93,30 +93,34 @@ class CLI:
         predefined list of modes (gradient, blurred, waveform, etc.).
         """
         print("Available modes:")
-        print("  1. Gradient")
-        print("  2. Blurred")
-        print("  3. Waveform")
-        print("  4. Album Image")
-        print("  5. Controller Image")
+        print("\t1. Gradient")
+        print("\t2. Blurred")
+        print("\t3. Waveform")
+        print("\t4. Album Image")
+        print("\t5. Controller Image")
+        print("\t6. Lyric card")
 
         choice = input("Choose modes (comma-separated): ")
         selected_modes = choice.replace(" ", "").split(",")
 
         new_modes = []
         for mode in selected_modes:
-            if mode == "1":
-                new_modes.append("gradient")
-            elif mode == "2":
-                new_modes.append("blurred")
-            elif mode == "3":
-                new_modes.append("waveform")
-            elif mode == "4":
-                new_modes.append("albumImage")
-            elif mode == "5":
-                new_modes.append("controllerImage")
-            else:
-                print(f"Invalid mode: {mode}")
-
+            match mode:
+                case "1":
+                    new_modes.append("gradient")
+                case "2":
+                    new_modes.append("blurred")
+                case "3":
+                    new_modes.append("waveform")
+                case "4":
+                    new_modes.append("albumImage")
+                case "5":
+                    new_modes.append("controllerImage")
+                case "6":
+                    new_modes.append("lyricCard")
+                case _:
+                    print(f"Invalid mode: {mode}")
+                    
         if new_modes:
             self.modes.clear()
             self.modes.extend(new_modes)
