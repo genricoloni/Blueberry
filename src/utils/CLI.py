@@ -48,11 +48,10 @@ class CLI:
         """
         while True:
             # Clear the screen (optional, depends on environment support)
-            #os.system("clear")
+            os.system("clear")
 
             print("Welcome to the SpotifySyncWall CLI!")
             print("Type 'help' for a list of commands. \n")
-            #print("Now playing: ", self.wallpaper_generator.get_current_album()," in mode: ", self.wallpaper_generator.get_current_mode())
 
             command = input("Enter a command: ")
             print()
@@ -60,30 +59,27 @@ class CLI:
             if command == "help":
                 self.show_help()
                 input("\nPress Enter to continue...")
-                continue
 
             if command == "exit":
                 print("Exiting the program...")
                 exit()
 
             if command == "settings":
-                print("Settings:")
-                print("  1. Choose which modes to use.")
-                setting = input("\nEnter a setting: ")
+                self.modify_modes()
+                input("Press Enter to continue...")
 
-                if setting == "1":
-                    self.modify_modes()
-                else:
-                    print("Invalid setting.")
-                    continue
-
-            if command == "fav":
+            if command == "save":
                 if not self.saveConfig():
                     input("Press Enter to continue...")
                     continue
-                print("Configuration saved.")
+                input("Configuration saved, press Enter to continue...")
+
+
+            if command == "show":
+                self.showConfig()
+                
                 input("Press Enter to continue...")
-                continue
+
 
     def modify_modes(self):
         """
@@ -120,7 +116,7 @@ class CLI:
                     new_modes.append("lyricCard")
                 case _:
                     print(f"Invalid mode: {mode}")
-                    
+
         if new_modes:
             self.modes.clear()
             self.modes.extend(new_modes)
@@ -136,10 +132,11 @@ class CLI:
         saving favorites, and exiting the program.
         """
         print("Available commands:")
-        print("  help - Show this help message.")
-        print("  settings - Change the wallpaper generation modes.")
-        print("  exit - Exit the program.")
-        print("  fav - Add the current configuration to favorites.")
+        print("\thelp - Show this help message.")
+        print("\tsettings - Change the wallpaper generation modes.")
+        print("\tsave - Save the current configuration to favorites.")
+        print("\tshow - Display the current wallpaper configuration.")
+        print("\texit - Exit the program.")
     
     def saveConfig(self):
         """
@@ -164,3 +161,8 @@ class CLI:
         except Exception as e:
             print(f"Error saving configuration: {e}")
             return False
+        
+    def showConfig(self):
+        print("Current configuration:")
+        print(f"\t{self.wallpaper_generator.get_current_song()} by {self.wallpaper_generator.get_current_artist()} in mode: {self.wallpaper_generator.get_current_mode()}")
+        print("")   

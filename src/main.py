@@ -119,6 +119,7 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
 
                 wallpaper_generator.set_current_mode(mode)
 
+
                 match mode:
                     case "albumImage":
                         # Create an album image object

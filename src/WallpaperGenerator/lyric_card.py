@@ -14,7 +14,6 @@ def create_lyric_image(display, artist_name, song_name, colors, cover_image):
         text (str): The text to be displayed on the lyric card.
         colors (list): A list of two colors used to create the background.
     """
-    print("creating lyric image")
     width = int(display[0])
     height = int(display[1])
     lf = LyricFinderClient()

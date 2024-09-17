@@ -28,7 +28,7 @@ class WallpaperGenerator:
 
     Attributes:
         display (list): The dimensions of the display.
-        now_showing (dict): Details of the song currently being displayed.
+        current_album_id (dict): Details of the song currently being displayed.
         cacheManager (cacheManager): The cache manager for managing cached image data.
     """
 
@@ -39,28 +39,88 @@ class WallpaperGenerator:
         Fetches the display dimensions and initializes the cache manager.
         """
         self.display = os.popen("xrandr").read().split("\n")[2].split()[0].split("x")
-        self.now_showing = None
+        self.current_album_id = None
+        self.current_artist = None
+        self.current_song = None
+        self.current_song_id = None
         self.current_mode = None
         self.cacheManager = cacheManager()
         self.changedModes = False
+        
 
-    def get_current_album(self):
+    def get_current_song(self):
         """
         Get the details of the currently playing song.
 
         Returns:
             dict: A dictionary containing details of the currently playing song (title, artist, image URL).
         """
-        return self.now_showing
+        return self.current_song
     
-    def set_current_album(self, song_id):
+    def set_current_song(self, song_name):
         """
         Set the details of the currently playing song.
 
         Parameters:
             song_details (dict): A dictionary containing details of the song (title, artist, image URL).
         """
-        self.now_showing = song_id
+        self.current_song = song_name
+
+
+    def get_current_song_id(self):
+        """
+        Get the ID of the currently playing song.
+
+        Returns:
+            str: The ID of the currently playing song.
+        """
+        return self.current_song_id
+    
+    def set_current_song_id(self, song_id):
+        """
+        Set the ID of the currently playing song.
+
+        Parameters:
+            song_id (str): The ID of the currently playing song.
+        """
+        self.current_song_id = song_id
+
+    
+    def get_current_artist(self):
+        """
+        Get the details of the currently playing song.
+
+        Returns:
+            dict: A dictionary containing details of the currently playing song (title, artist, image URL).
+        """
+        return self.current_artist
+    
+    def set_current_artist(self, artist_name):
+        """
+        Set the details of the currently playing song.
+
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
+        self.current_artist = artist_name
+    
+    def set_current_album(self, album_id):
+        """
+        Set the details of the currently playing song.
+
+        Parameters:
+            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+        """
+        self.current_album_id = album_id
+
+    def get_current_album(self):
+        """
+        Get the ID of the currently playing song.
+
+        Returns:
+            str: The ID of the currently playing song.
+        """
+        return self.current_album_id
 
     def get_current_mode(self):
         """
@@ -79,6 +139,27 @@ class WallpaperGenerator:
             mode (str): The new wallpaper mode.
         """
         self.current_mode = mode
+
+    def check_song_id(self, song_id):
+        """
+        Check if the provided song ID is the same as the currently playing song.
+
+        Parameters:
+            song_id (str): The song ID to check.
+
+        Returns:
+            bool: True if the song ID is the same as the currently playing song, False otherwise.
+        """
+        return song_id == self.current_song_id
+
+    def get_display(self):
+        """
+        Get the display dimensions.
+
+        Returns:
+            list: The dimensions of the display.
+        """
+        return self.display
 
     def get_colors(self, imageUrl):
         """
@@ -137,20 +218,32 @@ class WallpaperGenerator:
         Parameters:
             song_details (dict): A dictionary containing details of the song (title, artist, image URL).
         """
-        if song_details == self.now_showing:
+        if self.check_song_id(song_details['songID']):
             return
 
-        self.now_showing = song_details
-        song_title = song_details['songTitle']
-        artist_name = song_details['artistName']
         image_url = song_details['imageUrl']
-        colors = self.get_colors(image_url)
+        self.set_current_album(image_url)
 
-        image = self.setup_album_image(self.display, song_details['imageUrl'])
-        text = images.generate_text_image(song_title, artist_name, colors, self.display)
+        song_title = song_details['songTitle']
+        self.set_current_song(song_title)
 
-        cai(self.display, image, text, colors)
+        song_id = song_details['songID']
+        self.set_current_song_id(song_id)
 
+        artist_name = song_details['artistName']
+        self.set_current_artist(artist_name)
+
+        colors = self.get_colors(self.get_current_album())
+
+        image = self.setup_album_image(self.get_display(),
+                                       self.get_current_album())
+        
+        text = images.generate_text_image(self.get_current_song(), 
+                                          self.get_current_artist(), 
+                                          colors, 
+                                          self.get_display())
+
+        cai(self.get_display(), image, text, colors)
 
     def generate_gradient(self, song_details):
         """
@@ -161,19 +254,32 @@ class WallpaperGenerator:
         Parameters:
             song_details (dict): A dictionary containing details of the song (title, artist, image URL).
         """
-        if song_details == self.now_showing:
+        if self.check_song_id(song_details['songID']):
             return
 
-        self.now_showing = song_details
-        song_title = song_details['songTitle']
-        artist_name = song_details['artistName']
         image_url = song_details['imageUrl']
-        colors = self.get_colors(image_url)
+        self.set_current_album(image_url)
 
-        image = self.setup_album_image(self.display, image_url)
+        song_title = song_details['songTitle']
+        self.set_current_song(song_title)
 
+        song_id = song_details['songID']
+        self.set_current_song_id(song_id)
 
-        csi(colors, self.display, image.width, song_title, artist_name, image)
+        artist_name = song_details['artistName']
+        self.set_current_artist(artist_name)
+
+        colors = self.get_colors(self.get_current_album())
+
+        image = self.setup_album_image(self.get_display(), 
+                                       self.get_current_album())
+
+        csi(colors, 
+            self.get_display(), 
+            image.width, 
+            self.get_current_song(), 
+            self.get_current_artist(),
+            image)
 
     def generate_blurred(self, song_details):
         """
@@ -185,12 +291,24 @@ class WallpaperGenerator:
             song_details (dict): A dictionary containing details of the song (title, artist, image URL).
         """
 
-        if song_details == self.now_showing:
+        if self.check_song_id(song_details['songID']):
             return
 
-        cover_image = Image.open(io.BytesIO(self.cacheManager.get(song_details['imageUrl'])))
+        image_url = song_details['imageUrl']
+        self.set_current_album(image_url)
 
-        cbi(cover_image, self.display)
+        song_title = song_details['songTitle']
+        self.set_current_song(song_title)
+
+        song_id = song_details['songID']
+        self.set_current_song_id(song_id)
+
+        artist_name = song_details['artistName']
+        self.set_current_artist(artist_name)
+
+        cover_image = Image.open(io.BytesIO(self.cacheManager.get(self.get_current_album())))
+
+        cbi(cover_image, self.get_display())
 
     def generate_waveform(self, spotify_client, song_details):
         """
@@ -201,20 +319,36 @@ class WallpaperGenerator:
         Parameters:
             song_details (dict): A dictionary containing details of the song (title, artist, image URL).
         """
+
+        if self.check_song_id(song_details['songID']):
+            return
+
+        image_url = song_details['imageUrl']
+        self.set_current_album(image_url)
+
+        song_title = song_details['songTitle']
+        self.set_current_song(song_title)
+
+        song_id = song_details['songID']
+        self.set_current_song_id(song_id)
+
+        artist_name = song_details['artistName']
+        self.set_current_artist(artist_name)
         
-        audio_analysis = spotify_client.get_audio_analysis(song_details['songID'])
+        
+        audio_analysis = spotify_client.get_audio_analysis(self.get_current_song_id())
 
         if not audio_analysis:
             return
         
+        colors = self.get_colors(self.get_current_album())
 
         cwi(audio_analysis, 
-            self.display, 
-            self.cacheManager.get(song_details['imageUrl']),
-            song_details['artistName'],
-            song_details['songTitle'],
-            self.get_colors(song_details['imageUrl']))
-        
+            self.get_display(), 
+            self.cacheManager.get(self.get_current_album()),
+            self.get_current_song(),
+            self.get_current_artist(),
+            colors)
         
     def generate_controller(self, song_details):
         """
@@ -225,17 +359,35 @@ class WallpaperGenerator:
         Parameters:
             song_details (dict): A dictionary containing details of the song (title, artist, image URL).
         """
-        song_title = song_details['songTitle']
-        artist_name = song_details['artistName']
+        if self.check_song_id(song_details['songID']):
+            return
+
         image_url = song_details['imageUrl']
+        self.set_current_album(image_url)
+
+        song_title = song_details['songTitle']
+        self.set_current_song(song_title)
+
+        song_id = song_details['songID']
+        self.set_current_song_id(song_id)
+
+        artist_name = song_details['artistName']
+        self.set_current_artist(artist_name)
+
         song_length = song_details['songLength']
-        colors = self.get_colors(image_url)
+        colors = self.get_colors(self.get_current_album())
 
 
-        album_image = self.setup_album_image(self.display, image_url)
+        album_image = self.setup_album_image(self.display, self.get_current_album())
 
 
-        cci(song_title, artist_name, image_url, colors, self.display, song_length, album_image)
+        cci(self.get_current_song(), 
+            self.get_current_artist(), 
+            self.get_current_album(), 
+            colors, 
+            self.get_display(), 
+            song_length, 
+            album_image)
 
     def generate_lyric(self, song_details):
         """
@@ -246,12 +398,29 @@ class WallpaperGenerator:
         Parameters:
             song_details (dict): A dictionary containing details of the song (title, artist, image URL).
         """
-        song_title = song_details['songTitle']
-        artist_name = song_details['artistName']
+        if self.check_song_id(song_details['songID']):
+            return
+
         image_url = song_details['imageUrl']
-        colors = self.get_colors(image_url)
+        self.set_current_album(image_url)
 
-        cover_image = self.setup_album_image(self.display, image_url)
+        song_title = song_details['songTitle']
+        self.set_current_song(song_title)
+
+        song_id = song_details['songID']
+        self.set_current_song_id(song_id)
+
+        artist_name = song_details['artistName']
+        self.set_current_artist(artist_name)
+
+        colors = self.get_colors(self.get_current_album())
+
+        cover_image = self.setup_album_image(self.get_display(),
+                                            self.get_current_album())
 
 
-        cli(self.display, artist_name, song_title, colors, cover_image)
+        cli(self.get_display(),
+            self.get_current_artist(), 
+            self.get_current_song(), 
+            colors, 
+            cover_image)

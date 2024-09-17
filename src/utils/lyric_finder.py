@@ -134,8 +134,6 @@ class LyricFinderClient:
         if match:
             chorus_lyrics = match.group(1).strip()
 
-            print(chorus_lyrics)
-
             return self.reduce_if_double(chorus_lyrics)
         
         # Se non trova un chorus, cerca per "Bridge"
@@ -144,7 +142,6 @@ class LyricFinderClient:
         if bridge_match:
             bridge_lyrics = bridge_match.group(1).strip()
             
-
             return self.reduce_if_double(bridge_lyrics)
         
         # Se non trova un bridge, cerca per "Verse"
@@ -213,15 +210,3 @@ class LyricFinderClient:
         """Close the client's session."""
         self.session.close()
 
-
-def main():
-    lf = LyricFinderClient()
-    lyric = lf.get_lyric("")
-    if lyric:
-        #print("Lyric found:", lyric)
-        print("Most relevant part:", lf.find_most_relevant_part(lyric))
-    lf.close()
-
-if __name__ == "__main__":
-    print("Esecuzione del modulo come script")
-    main()
