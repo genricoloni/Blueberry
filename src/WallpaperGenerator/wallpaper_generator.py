@@ -1,23 +1,24 @@
-import os
-from utils.cache import CacheManager
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
-import io
-import colorgram
-import random
-import utils.spotify
+"""
+Module to generate wallpapers based on song details.
+"""
 
-import utils.images as images
+import os
+import io
+
+#pylint: disable=import-error, no-member
+from PIL import Image
+import colorgram
+
+
+from utils import images
+from utils.cache import CacheManager
+
 
 from WallpaperGenerator.album_image import create_album_image as cai
-
 from WallpaperGenerator.gradient import generate_gradient_image as csi
-
 from WallpaperGenerator.blurred import create_blurred_image as cbi
-
 from WallpaperGenerator.waveform import create_waveform_image as cwi
-
 from WallpaperGenerator.controller import create_controller_image as cci
-
 from WallpaperGenerator.lyric_card import create_lyric_image as cli
 
 class WallpaperGenerator:
@@ -44,25 +45,25 @@ class WallpaperGenerator:
         self.current_song = None
         self.current_song_id = None
         self.current_mode = None
-        self.CacheManager = CacheManager()
-        self.changedModes = False
-        
+        self.cache_manager = CacheManager()
 
     def get_current_song(self):
         """
         Get the details of the currently playing song.
 
         Returns:
-            dict: A dictionary containing details of the currently playing song (title, artist, image URL).
+            dict: A dictionary containing details of the currently playing song 
+                (title, artist, image URL).
         """
         return self.current_song
-    
+
     def set_current_song(self, song_name):
         """
         Set the details of the currently playing song.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song
+                (title, artist, image URL).
         """
         self.current_song = song_name
 
@@ -75,7 +76,7 @@ class WallpaperGenerator:
             str: The ID of the currently playing song.
         """
         return self.current_song_id
-    
+
     def set_current_song_id(self, song_id):
         """
         Set the ID of the currently playing song.
@@ -85,31 +86,33 @@ class WallpaperGenerator:
         """
         self.current_song_id = song_id
 
-    
     def get_current_artist(self):
         """
         Get the details of the currently playing song.
 
         Returns:
-            dict: A dictionary containing details of the currently playing song (title, artist, image URL).
+            dict: A dictionary containing details of the currently playing song 
+                (title, artist, image URL).
         """
         return self.current_artist
-    
+
     def set_current_artist(self, artist_name):
         """
         Set the details of the currently playing song.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song
+                (title, artist, image URL).
         """
         self.current_artist = artist_name
-    
+
     def set_current_album(self, album_id):
         """
         Set the details of the currently playing song.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song
+                (title, artist, image URL).
         """
         self.current_album_id = album_id
 
@@ -130,7 +133,7 @@ class WallpaperGenerator:
             str: The current wallpaper mode.
         """
         return self.current_mode
-    
+
     def set_current_mode(self, mode):
         """
         Set the current wallpaper mode.
@@ -148,7 +151,8 @@ class WallpaperGenerator:
             song_id (str): The song ID to check.
 
         Returns:
-            bool: True if the song ID is the same as the currently playing song, False otherwise.
+            bool: True if the song ID is the same as the currently playing song,
+                False otherwise.
         """
         return song_id == self.current_song_id
 
@@ -165,7 +169,8 @@ class WallpaperGenerator:
         """
         Extract the most common colors from an image.
 
-        Uses the colorgram library to extract the most dominant colors from the image.
+        Uses the colorgram library to extract the most 
+        dominant colors from the image.
 
         Parameters:
             image_url (str): The URL of the image to process.
@@ -173,7 +178,7 @@ class WallpaperGenerator:
         Returns:
             list: A list of the two most dominant colors in the image.
         """
-        image = Image.open(io.BytesIO(self.CacheManager.get(image_url)))
+        image = Image.open(io.BytesIO(self.cache_manager.get(image_url)))
 
         colors = colorgram.extract(image, 6)
 
@@ -183,8 +188,7 @@ class WallpaperGenerator:
         for i in range(1, len(colors)):
             if colors[i].rgb == colors[0].rgb:
                 return [colors[0], colors[i]]
-        else:
-            return [colors[0], colors[1]]
+        return [colors[0], colors[1]]
 
     def setup_album_image(self, display, image_url):
         """
@@ -201,22 +205,24 @@ class WallpaperGenerator:
             Image: The resized album image to fit the display.
         """
         width = int(int(display[0]) / 5)
-        image = Image.open(io.BytesIO(self.CacheManager.get(image_url)))
+        image = Image.open(io.BytesIO(self.cache_manager.get(image_url)))
 
-        wpercent = (width / float(image.size[0]))
+        wpercent = width / float(image.size[0])
         hsize = int((float(image.size[1]) * float(wpercent)))
 
-        return image.resize((width, hsize), Image.LANCZOS) 
+        return image.resize((width, hsize), Image.LANCZOS)
 
     def generate_album_image(self, song_details):
         """
         Generate an album image based on the provided song details.
 
-        If the song is different from the currently displayed song, this method retrieves
+        If the song is different from the currently displayed song,
+        this method retrieves
         the album artwork, extracts colors, and creates a wallpaper image.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song 
+                (title, artist, image URL).
         """
         if self.check_song_id(song_details['song_id']):
             return
@@ -237,10 +243,10 @@ class WallpaperGenerator:
 
         image = self.setup_album_image(self.get_display(),
                                        self.get_current_album())
-        
-        text = images.generate_text_image(self.get_current_song(), 
-                                          self.get_current_artist(), 
-                                          colors, 
+
+        text = images.generate_text_image(self.get_current_song(),
+                                          self.get_current_artist(),
+                                          colors,
                                           self.get_display())
 
         cai(self.get_display(), image, text, colors)
@@ -249,10 +255,12 @@ class WallpaperGenerator:
         """
         Generate a gradient wallpaper based on the provided song details.
 
-        This method generates a gradient wallpaper using the extracted colors from the album artwork.
+        This method generates a gradient wallpaper using the extracted
+            colors from the album artwork.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song
+                (title, artist, image URL).
         """
         if self.check_song_id(song_details['song_id']):
             return
@@ -271,13 +279,13 @@ class WallpaperGenerator:
 
         colors = self.get_colors(self.get_current_album())
 
-        image = self.setup_album_image(self.get_display(), 
+        image = self.setup_album_image(self.get_display(),
                                        self.get_current_album())
 
-        csi(colors, 
-            self.get_display(), 
-            image.width, 
-            self.get_current_song(), 
+        csi(colors,
+            self.get_display(),
+            image.width,
+            self.get_current_song(),
             self.get_current_artist(),
             image)
 
@@ -288,7 +296,8 @@ class WallpaperGenerator:
         This method generates a blurred wallpaper using the album artwork.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song
+                (title, artist, image URL).
         """
 
         if self.check_song_id(song_details['song_id']):
@@ -306,7 +315,7 @@ class WallpaperGenerator:
         artist_name = song_details['artist_name']
         self.set_current_artist(artist_name)
 
-        cover_image = Image.open(io.BytesIO(self.CacheManager.get(self.get_current_album())))
+        cover_image = Image.open(io.BytesIO(self.cache_manager.get(self.get_current_album())))
 
         cbi(cover_image, self.get_display())
 
@@ -317,7 +326,8 @@ class WallpaperGenerator:
         This method generates a waveform wallpaper using the album artwork.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song
+                (title, artist, image URL).
         """
 
         if self.check_song_id(song_details['song_id']):
@@ -334,22 +344,20 @@ class WallpaperGenerator:
 
         artist_name = song_details['artist_name']
         self.set_current_artist(artist_name)
-        
-        
-        audio_analysis = spotify_client.get_audio_analysis(self.get_current_song_id())
 
-        if not audio_analysis:
-            return
-        
+        audio_analysis = spotify_client.get_audio_analysis(
+            self.get_current_song_id())
+
         colors = self.get_colors(self.get_current_album())
 
-        cwi(audio_analysis, 
-            self.get_display(), 
-            self.CacheManager.get(self.get_current_album()),
+        cwi(audio_analysis,
+            self.get_display(),
             self.get_current_song(),
             self.get_current_artist(),
             colors)
-        
+
+        return
+
     def generate_controller(self, song_details):
         """
         Generate a controller wallpaper based on the provided song details.
@@ -357,7 +365,8 @@ class WallpaperGenerator:
         This method generates a controller wallpaper using the album artwork.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song
+                (title, artist, image URL).
         """
         if self.check_song_id(song_details['song_id']):
             return
@@ -378,16 +387,18 @@ class WallpaperGenerator:
         colors = self.get_colors(self.get_current_album())
 
 
-        album_image = self.setup_album_image(self.display, self.get_current_album())
+        album_image = self.setup_album_image(self.display,
+                                             self.get_current_album())
 
 
-        cci(self.get_current_song(), 
-            self.get_current_artist(), 
-            self.get_current_album(), 
-            colors, 
-            self.get_display(), 
-            song_length, 
+        cci(self.get_current_song(),
+            self.get_current_artist(),
+            colors,
+            self.get_display(),
+            song_length,
             album_image)
+
+        return
 
     def generate_lyric(self, song_details):
         """
@@ -396,7 +407,8 @@ class WallpaperGenerator:
         This method generates a lyric card wallpaper using the album artwork.
 
         Parameters:
-            song_details (dict): A dictionary containing details of the song (title, artist, image URL).
+            song_details (dict): A dictionary containing details of the song
+                (title, artist, image URL).
         """
         if self.check_song_id(song_details['song_id']):
             return
@@ -418,9 +430,8 @@ class WallpaperGenerator:
         cover_image = self.setup_album_image(self.get_display(),
                                             self.get_current_album())
 
-
         cli(self.get_display(),
-            self.get_current_artist(), 
-            self.get_current_song(), 
-            colors, 
+            self.get_current_artist(),
+            self.get_current_song(),
+            colors,
             cover_image)

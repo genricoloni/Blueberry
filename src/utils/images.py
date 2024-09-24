@@ -32,7 +32,7 @@ def paste_and_save_album_image(bg, cover, display, text):
 
     background.save("ImageCache/finalImage.png")
 
-# pylint: disable="too-many-arguments"
+#pylint: disable=too-many-positional-arguments, too-many-arguments
 def generate_text_image(song_title, artist_name, colors, display, position_x=50, position_y=50):
     """
     Generate a text image containing the song title and artist name.

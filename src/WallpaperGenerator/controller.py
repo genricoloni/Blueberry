@@ -1,9 +1,13 @@
+"""
+Module for generating a controller image based on the provided song details.
+"""
+
 from PIL import Image, ImageDraw, ImageFont
 from lxml import etree
 from cairosvg import svg2png
 
-
-def create_controller_image(song_title, artist_name, image_url, colors, display, song_length, album_image):
+#pylint: disable=import-error, too-many-arguments, too-many-positional-arguments, too-many-locals, c-extension-no-member
+def create_controller_image(song_title, artist_name, colors, display, song_length, album_image):
     """
     Create a controller image based on the provided song details.
     
@@ -42,7 +46,7 @@ def create_controller_image(song_title, artist_name, image_url, colors, display,
     controller_image.paste(album_image, (width // 2 - album_image.width // 2, height // 6))
 
     # Modify the fill color of specified paths in an SVG and convert it to PNG
-    fillWithSecondaryColor(colors[1].rgb, 200, 200)
+    fill_with_secondary_color(colors[1].rgb, 200, 200)
 
     # Open the pause button image
     pause_button = Image.open("ImageCache/pause-button.png").convert("RGBA")
@@ -51,27 +55,50 @@ def create_controller_image(song_title, artist_name, image_url, colors, display,
     text = generate_centered_text_image(song_title, artist_name, colors, display)
 
     # Paste the pause button image onto the controller image
-    controller_image.paste(pause_button, (width // 2 - pause_button.width // 2, height // 6 + album_image.height + 250), mask=pause_button)
+    controller_image.paste(pause_button,
+                           (width // 2 - pause_button.width // 2,
+                            height // 6 + album_image.height + 250),
+                           mask=pause_button)
 
     # Draw a rectangle below the pause button
-    draw.rectangle([width//6, height//6 + album_image.height + 210, width - width//6 + 100, height//6 + album_image.height + 215], fill=colors[1].rgb)
+    draw.rectangle([width//6,
+                    height//6 + album_image.height + 210,
+                    width - width//6 + 100, height//6 + album_image.height + 215],
+                    fill=colors[1].rgb)
 
     # Draw the song length text
-    textOffset = (1, 1)
-    draw.text((width//6 - 120 + textOffset[0], height//6 + album_image.height + 190 + textOffset[1]), "00:00", font=font, fill=(0, 0, 0))  # Draw black shadow
-    draw.text((width//6 - 120, height//6 + album_image.height + 190), "00:00", font=font, fill=colors[1].rgb)  # Draw desired color on top
-    draw.text((width - width//6 + 100 + textOffset[0], height//6 + album_image.height + 190 + textOffset[1]), f" {minutes if minutes > 9 else '0' + str(minutes)}:{seconds if seconds > 9 else '0' + str(seconds)}", font=font, fill=(0, 0, 0))  # Draw black shadow
-    draw.text((width - width//6 + 100, height//6 + album_image.height + 190), f" {minutes if minutes > 9 else '0' + str(minutes)}:{seconds if seconds > 9 else '0' + str(seconds)}", font=font, fill=colors[1].rgb)  # Draw desired color on top
+    text_offset = (1, 1)
+    draw.text((width//6 - 120 + text_offset[0],
+               height//6 + album_image.height + 190 + text_offset[1]),
+               "00:00", font=font, fill=(0, 0, 0))  # Draw black shadow
+
+    draw.text((width//6 - 120,
+               height//6 + album_image.height + 190),
+               "00:00", font=font, fill=colors[1].rgb)  # Draw desired color on top
+
+    duration = f"{minutes if minutes > 9 else '0' + str(minutes)}"
+    duration += f":{seconds if seconds > 9 else '0' + str(seconds)}"
+    draw.text((width - width//6 + 100 + text_offset[0],
+                height//6 + album_image.height + 190 + text_offset[1]),
+                duration,
+                font=font, fill=(0, 0, 0))  # Draw black shadow
+    draw.text((width - width//6 + 100,
+                    height//6 + album_image.height + 190),
+                    duration,
+                    font=font, fill=colors[1].rgb)  # Draw desired color on top
 
     # Paste the text image onto the controller image
-    controller_image.paste(text, (width // 2 - text.width // 2, height // 6 + album_image.height + 100), mask=text)
+    controller_image.paste(text,
+                           (width // 2 - text.width // 2,
+                            height // 6 + album_image.height + 100),
+                            mask=text)
 
     # Save the final controller image
     controller_image.save("ImageCache/finalImage.png")
 
 
 
-def fillWithSecondaryColor(color, width, height):
+def fill_with_secondary_color(color, width, height):
     """
     Modifies the fill color of specified paths in an SVG and converts it to PNG.
 
@@ -98,17 +125,20 @@ def fillWithSecondaryColor(color, width, height):
         f.write(etree.tostring(svg))
 
     #convert the svg to a png image
-    svg2png(url="ImageCache/modified_pause-button.svg", write_to="ImageCache/pause-button.png", output_width=width, output_height=height, background_color="transparent")
+    svg2png(url="ImageCache/modified_pause-button.svg",
+            write_to="ImageCache/pause-button.png",
+            output_width=width, output_height=height,
+            background_color="transparent")
 
 
 
-def generate_centered_text_image(songTitle, artistName, colors, display):
+def generate_centered_text_image(song_title, artist_name, colors, display):
     """
     Generate a text image with the song title and artist name, centered on the display.
     
     Args:
-        songTitle (str): The title of the currently playing song.
-        artistName (str): The name of the artist of the currently playing song.
+        song_title (str): The title of the currently playing song.
+        artist_name (str): The name of the artist of the currently playing song.
         colors (list): A list of two color objects.
         display (tuple): The dimensions of the display.
         
@@ -117,24 +147,28 @@ def generate_centered_text_image(songTitle, artistName, colors, display):
     width = int(display[0])
     height = int(display[1])
     # Setup Text: check if the first color is too light or too dark
-    textColor = colors[0].rgb
+    text_olor = colors[0].rgb
 
     #if the color is too light, make the text black, otherwise make it white
-    if (textColor[0]*0.299 + textColor[1]*0.587 + textColor[2]*0.114) > 186:
-        textColor = (int(0), int(0), int(0))
+    if (text_olor[0]*0.299 + text_olor[1]*0.587 + text_olor[2]*0.114) > 186:
+        text_olor = (int(0), int(0), int(0))
     else:
-        textColor = (int(255), int(255), int(255))
+        text_olor = (int(255), int(255), int(255))
 
     #create a new image with the name of the song and the artist, and transparent background
     text = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     #create a draw object
     draw = ImageDraw.Draw(text)
     #set the font
-    myFont = ImageFont.truetype("./fonts/Rubik.ttf", 40)
+    my_ont = ImageFont.truetype("./fonts/Rubik.ttf", 40)
     #draw the text in the center of the display
-    draw.text((0,0), (songTitle + "\n" + artistName), font = myFont, fill = (textColor[0],textColor[1],textColor[2]), align="center")
+    draw.text((0,0),
+              (song_title + "\n" + artist_name),
+              font = my_ont,
+              fill = (text_olor[0],text_olor[1],text_olor[2]),
+              align="center")
     #save the text image as 'text.png'
 
     cropped = text.crop(text.getbbox())
-    
+
     return cropped

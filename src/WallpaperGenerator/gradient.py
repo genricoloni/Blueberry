@@ -1,5 +1,9 @@
-from PIL import Image, ImageDraw
+"""
+Module for generating gradient images based on the colors of the album cover.
+"""
 import random
+from PIL import Image, ImageDraw
+#pylint: disable=import-error, too-many-arguments, too-many-positional-arguments
 from utils.images import generate_text_image, find_darkest_color, paste_and_save_album_image
 
 def generate_gradient_image(colors, display, album_image_width, song_title, artist_name, image):
@@ -28,12 +32,14 @@ def generate_gradient_image(colors, display, album_image_width, song_title, arti
         bg = create_centered_gradient(colors, display, album_image_width)
         # Generate text with the darkest color
         text = generate_text_image(
-            song_title, artist_name, find_darkest_color(colors), display, position_x=50, position_y=50
+            song_title, artist_name,
+            find_darkest_color(colors),
+            display,
+            position_x=50, position_y=50
         )
-    
+
     # Paste the album image and save the final image
     paste_and_save_album_image(bg, image, display, text)
-
 
 def create_standard_gradient(colors, display):
     """

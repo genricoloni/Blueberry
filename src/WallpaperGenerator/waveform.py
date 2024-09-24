@@ -1,9 +1,15 @@
+"""
+Module for generating a waveform image based on the audio analysis data from the Spotify API.
+"""
+#pylint: disable=import-error, no-member
+
 from PIL import Image, ImageDraw
 import utils.images
 
-def create_waveform_image(audio_analysis, display, cover_image, artist_name, song_title, colors):
+def create_waveform_image(audio_analysis, display, artist_name, song_title, colors):
     """
-    Create and save a waveform image based on the audio analysis data, overlaying the song title, artist name, and cover image.
+    Create and save a waveform image based on the audio analysis data,
+    overlaying the song title, artist name, and cover image.
 
     Args:
         audio_analysis (dict): Audio analysis data from the Spotify API.
@@ -11,7 +17,8 @@ def create_waveform_image(audio_analysis, display, cover_image, artist_name, son
         cover_image (PIL.Image): The album cover image.
         artist_name (str): The name of the artist.
         song_title (str): The title of the song.
-        colors (list): List of two colors, where the first is for the background and the second is for the waveform.
+        colors (list): List of two colors, 
+            where the first is for the background and the second is for the waveform.
 
     Returns:
         None: The function saves the generated image to the 'ImageCache/finalImage.png' file.
@@ -36,7 +43,9 @@ def create_waveform_image(audio_analysis, display, cover_image, artist_name, son
     final_image = Image.new('RGB', (width, height), colors[0].rgb)
 
     # Paste the waveform image and text image onto the final image
-    final_image.paste(waveform_image, (width // 2 - waveform_image.width // 2, height // 2 - waveform_image.height // 2))
+    final_image.paste(waveform_image,
+                      (width // 2 - waveform_image.width // 2,
+                       height // 2 - waveform_image.height // 2))
     final_image.paste(text_image, (0, 0), mask=text_image)
 
     # Save the final image
@@ -64,7 +73,8 @@ def extract_loudness_data(audio_analysis, duration, sample_points=100):
     loudness_levels = [0] * sample_points
     for segment in segments:
         start_index = int(segment['start'] * sample_points)
-        end_index = min(sample_points, int((segment['start'] + segment['duration']) * sample_points))
+        end_index = min(sample_points,
+                        int((segment['start'] + segment['duration']) * sample_points))
         for i in range(start_index, end_index):
             loudness_levels[i] = max(loudness_levels[i], segment['loudness'])
 
@@ -92,8 +102,10 @@ def generate_waveform_image(levels, display_dimensions, colors):
     image = Image.new('RGB', (width, height), colors[0].rgb)
 
     # Create waveform schema for the loudness levels (upper and lower halves)
-    schema = [(int(i / 100 * width), int((1/2 + level/2) * height)) for i, level in enumerate(levels)]
-    inverted_schema = [(int(i / 100 * width), int((1/2 - level/2) * height)) for i, level in enumerate(levels)]
+    schema = [(int(i / 100 * width),
+               int((1/2 + level/2) * height)) for i, level in enumerate(levels)]
+    inverted_schema = [(int(i / 100 * width),
+                        int((1/2 - level/2) * height)) for i, level in enumerate(levels)]
 
     # Normalize the schema to fit the screen's height
     schema = [(x, int(y * (base_height / height))) for x, y in schema]
@@ -102,9 +114,8 @@ def generate_waveform_image(levels, display_dimensions, colors):
     draw = ImageDraw.Draw(image)
 
     # Draw the waveform as rounded rectangles
-    for i in range(len(schema)):
+    for i, start_point in enumerate(schema):
         start_point = schema[i]
-        end_point = (inverted_schema[i][0], schema[i][1])
 
         if abs(start_point[1] - inverted_schema[i][1]) < 32:
             draw.rounded_rectangle(

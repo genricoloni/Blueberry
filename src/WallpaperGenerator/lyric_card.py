@@ -1,6 +1,11 @@
+"""
+Module for generating lyric card images.
+"""
+#pylint: disable=import-error, no-member
+
 from PIL import Image, ImageDraw, ImageFont
 from utils.lyric_finder import LyricFinderClient
-from utils.images import generate_text_image, find_darkest_color
+
 
 def create_lyric_image(display, artist_name, song_name, colors, cover_image):
     """
@@ -28,11 +33,11 @@ def create_lyric_image(display, artist_name, song_name, colors, cover_image):
     lyric = lf.get_lyric(artist_name + " " + song_name)
 
     if not lyric:
-        raise Exception("Lyrics not found.")
+        return None
 
     lyric = lf.find_most_relevant_part(lyric).upper()
 
-    paste_album_image(background_image, cover_image, song_name, artist_name)
+    paste_album_image(background_image, cover_image)
 
 
     text = generate_header_text_image(song_name, artist_name, colors, display)
@@ -44,11 +49,7 @@ def create_lyric_image(display, artist_name, song_name, colors, cover_image):
     #paste the text on the image on x,y position
     background_image.paste(text, (x, y), mask = text)
 
-
     lyric_box = generate_lyric_box(display, lyric, colors)
-
-
-    #create an image with the lyrics
 
     #coordinates to place the lyric box on the right side of the image, without going out of bounds
     x = background_image.width // 2 + (background_image.width // 2 - lyric_box.width) // 2
@@ -56,17 +57,12 @@ def create_lyric_image(display, artist_name, song_name, colors, cover_image):
 
     #paste the lyric box on the image
     background_image.paste(lyric_box, (x, y), mask = lyric_box)
-    
+
     background_image.save("ImageCache/finalImage.png")
 
+    return background_image
 
-
-
-    
-
-
-
-def paste_album_image(background_image, cover_image, song_title, artist_name):
+def paste_album_image(background_image, cover_image):
     """
     Paste the album cover image on the left side of the background image.
 
@@ -101,30 +97,30 @@ def generate_header_text_image(song_name, artist_name, colors, display):
     width = int(display[0])
     height = int(display[1])
     # Setup Text: check if the first color is too light or too dark
-    textColor = colors[0].rgb
+    text_color = colors[0].rgb
 
     #if the color is too light, make the text black, otherwise make it white
-    if (textColor[0]*0.299 + textColor[1]*0.587 + textColor[2]*0.114) > 186:
-        textColor = (int(0), int(0), int(0))
+    if (text_color[0]*0.299 + text_color[1]*0.587 + text_color[2]*0.114) > 186:
+        text_color = (int(0), int(0), int(0))
     else:
-        textColor = (int(255), int(255), int(255))
+        text_color = (int(255), int(255), int(255))
 
     #create a new image with the name of the song and the artist, and transparent background
     text = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     #create a draw object
     draw = ImageDraw.Draw(text)
     #set the font
-    myFont = ImageFont.truetype("./fonts/Rubik.ttf", 40)
+    my_font = ImageFont.truetype("./fonts/Rubik.ttf", 40)
     #draw the text in the center of the display
 
+    draw.text((0,0),
+              (song_name + "\n" + artist_name),
+              font = my_font,
+              fill = (text_color[0],text_color[1],text_color[2]),
+              align="center")
 
-    draw.text((0,0), (song_name + "\n" + artist_name), font = myFont, fill = (textColor[0],textColor[1],textColor[2]), align="center")
-    #save the text image as 'text.png'
-    
     cropped = text.crop(text.getbbox())
 
-
-    
     return cropped
 
 def generate_lyric_box(display, lyric, colors):
@@ -142,33 +138,32 @@ def generate_lyric_box(display, lyric, colors):
     width = int(display[0])
     height = int(display[1])
     # Setup Text: check if the first color is too light or too dark
-    textColor = colors[0].rgb
+    text_color = colors[0].rgb
 
     #if the color is too light, make the text black, otherwise make it white
-    if (textColor[0]*0.299 + textColor[1]*0.587 + textColor[2]*0.114) > 186:
-        textColor = (int(0), int(0), int(0))
+    if (text_color[0]*0.299 + text_color[1]*0.587 + text_color[2]*0.114) > 186:
+        text_color = (int(0), int(0), int(0))
     else:
-        textColor = (int(255), int(255), int(255))
-
+        text_color = (int(255), int(255), int(255))
 
     #create a new image with the name of the song and the artist, and transparent background
     text = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     #create a draw object
     draw = ImageDraw.Draw(text)
     #set the font
-    myFont = ImageFont.truetype("./fonts/Rubik.ttf", 40)
+    my_font = ImageFont.truetype("./fonts/Rubik.ttf", 40)
     #draw the text in the center of the display as bold
-    draw.text((0,0), 
-              lyric, font = myFont, 
-              fill = (textColor[0],textColor[1],textColor[2]), 
-              align="center", 
+    draw.text((0,0),
+              lyric, font = my_font,
+              fill = (text_color[0],text_color[1],text_color[2]),
+              align="center",
               stroke_width=2)
-    
+
     cropped = text.crop(text.getbbox())
 
     #if the text is larger than half the display, resize it to fit
     if cropped.width > width // 2:
-        cropped = cropped.resize((width // 2 - width // 100
-                                  , cropped.height), Image.LANCZOS)
-    
+        cropped = cropped.resize((width // 2 - width // 100,
+                                  cropped.height), Image.LANCZOS)
+
     return cropped
