@@ -1,24 +1,36 @@
+"""
+The main module that initializes the application components and starts the necessary threads.
+
+This module sets up the configuration, initializes the Spotify client and the wallpaper
+generator, and starts two separate threads: one for monitoring the music and changing
+the wallpaper, and another for handling user input via the CLI.
+It waits for the CLI thread to finish and then stops the wallpaper thread.
+
+"""
+
+
 import threading
 import time
-import os
 import random
+import sys
+
 from utils.spotify import SpotifyClient
-from WallpaperGenerator.wallpaper_generator import WallpaperGenerator
 from utils.CLI import CLI
 from utils.config import ConfigManager
 from utils.handler import Handler
+from WallpaperGenerator.wallpaper_generator import WallpaperGenerator
 
 def main():
     """
     The main function that initializes the application components and starts the necessary threads.
     
-    This function sets up the configuration, initializes the Spotify client and the wallpaper generator,
-    and starts two separate threads: one for monitoring the music and changing the wallpaper, and another
-    for handling user input via the CLI. It waits for the CLI thread to finish and then stops the wallpaper thread.
+    This function sets up the configuration, initializes the Spotify client and the wallpaper 
+    generator, and starts two separate threads: one for monitoring the music and changing 
+    the wallpaper, and another for handling user input via the CLI. 
+    It waits for the CLI thread to finish and then stops the wallpaper thread.
     """
     # Initialize configuration
     config_manager = ConfigManager('creds.txt')
-    
     # Initialize Spotify client
     spotify_client = SpotifyClient(
         client_id=config_manager.get('client_id'),
@@ -33,8 +45,12 @@ def main():
 
     # Flag for thread communication
     stop_event = threading.Event()  # Signal for the thread to stop
-    modes = ["gradient", "blurred", "waveform", "albumImage", "controllerImage", "lyric"]  # Current modes
-
+    modes = ["gradient",
+             "blurred", 
+             "waveform", 
+             "albumImage", 
+             "controllerImage", 
+             "lyric"]
     # Thread for monitoring music and generating wallpaper
     wallpaper_thread = threading.Thread(
         target=change_wallpaper_periodically,
@@ -67,8 +83,9 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
     """
     Periodically change the wallpaper based on the currently playing song on Spotify.
     
-    This function runs in a separate thread. It continuously checks the current song playing on Spotify,
-    generates a new wallpaper based on a random mode (gradient, blurred, etc.), and updates the desktop wallpaper.
+    This function runs in a separate thread. It continuously checks the current song playing on
+    Spotify, generates a new wallpaper based on a random mode (gradient, blurred, etc.),
+    and updates the desktop wallpaper.
     
     Parameters:
     - spotify_client (SpotifyClient): The client used to fetch the currently playing song.
@@ -83,17 +100,17 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
             song_details = spotify_client.get_current_song()
             handler.loadFavorites()
 
-            if not song_details or song_details["playing"] == False:
+            if not song_details or song_details["playing"] is False:
                 handler.restoreWallpaper()
                 handler.change_status(False)
                 time.sleep(1)
                 continue
 
-            if song_details["playing"] == False:
+            if song_details["playing"] is False:
                 time.sleep(1)
                 continue
 
-            if handler.is_paused() == False and song_details["playing"]:
+            if handler.is_paused() is False and song_details["playing"]:
                 handler.change_status(True)
                 if handler.same_song(song_details["songID"]):
                     handler.change_song(song_details["songID"])
@@ -108,9 +125,9 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
 
                 if song_details["songID"] in handler.favorites:
                     # Choose from the favorites with the same albumID
-                    path = f"src/savedConfigs/{song_details['songID']}-{handler.favorites[song_details['songID']]}.png"
+                    path = f"src/savedConfigs/{song_details['songID']}"
+                    path += f"-{handler.favorites[song_details['songID']]}.png"
                     handler.setWallpaper(path)
-                    
                     time.sleep(1)
                     continue
 
@@ -149,9 +166,9 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
 
             # Wait time before updating the wallpaper again
             time.sleep(1)
-        except Exception as e:
+        except IOError as e:
             print(f"Error generating wallpaper: {e}")
-            exit()
+            sys.exit(1)
 
 
 def start_cli(spotify_client, wallpaper_generator, stop_event, modes):
