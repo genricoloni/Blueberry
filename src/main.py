@@ -15,7 +15,7 @@ import random
 import sys
 
 from utils.spotify import SpotifyClient
-from utils.CLI import CLI
+from utils.command_line_interface import CommandLineInterface as CLI
 from utils.config import ConfigManager
 from utils.handler import Handler
 from WallpaperGenerator.wallpaper_generator import WallpaperGenerator
@@ -74,7 +74,7 @@ def main():
     stop_event.set()
     wallpaper_thread.join()
 
-    handler.restoreWallpaper()
+    handler.restore_wallpaper()
 
     print("Program terminated")
 
@@ -98,10 +98,10 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
     while not stop_event.is_set():
         try:
             song_details = spotify_client.get_current_song()
-            handler.loadFavorites()
+            handler.load_favorites()
 
             if not song_details or song_details["playing"] is False:
-                handler.restoreWallpaper()
+                handler.restore_wallpaper()
                 handler.change_status(False)
                 time.sleep(1)
                 continue
@@ -112,22 +112,22 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
 
             if handler.is_paused() is False and song_details["playing"]:
                 handler.change_status(True)
-                if handler.same_song(song_details["songID"]):
-                    handler.change_song(song_details["songID"])
-                    handler.setWallpaper()
+                if handler.same_song(song_details["song_id"]):
+                    handler.change_song(song_details["song_id"])
+                    handler.set_wallpaper()
 
             # If the song changed, or if the song was previously paused and is now playing
-            if not handler.same_song(song_details["songID"]) or old_modes != modes:
-                handler.change_song(song_details["songID"])
+            if not handler.same_song(song_details["song_id"]) or old_modes != modes:
+                handler.change_song(song_details["song_id"])
                 handler.change_status(True)
                 old_modes = modes
-                wallpaper_generator.set_current_album(song_details["songID"])
+                wallpaper_generator.set_current_album(song_details["song_id"])
 
-                if song_details["songID"] in handler.favorites:
+                if song_details["song_id"] in handler.favorites:
                     # Choose from the favorites with the same albumID
-                    path = f"src/savedConfigs/{song_details['songID']}"
-                    path += f"-{handler.favorites[song_details['songID']]}.png"
-                    handler.setWallpaper(path)
+                    path = f"src/savedConfigs/{song_details['song_id']}"
+                    path += f"-{handler.favorites[song_details['song_id']]}.png"
+                    handler.set_wallpaper(path)
                     time.sleep(1)
                     continue
 
@@ -162,7 +162,7 @@ def change_wallpaper_periodically(spotify_client, wallpaper_generator, stop_even
                         # Create a lyric wallpaper
                         wallpaper_generator.generate_lyric(song_details)
 
-                handler.setWallpaper()
+                handler.set_wallpaper()
 
             # Wait time before updating the wallpaper again
             time.sleep(1)

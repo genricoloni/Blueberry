@@ -1,16 +1,18 @@
-import requests
-from cachetools import TTLCache
-from spotipy import util
+"""
+Module for interacting with the Spotify API.
+"""
 import json
-from urllib.parse import urlencode
-import time
+
+import requests
+from spotipy import util
 
 
 class SpotifyClient:
     """
     A class representing a client for interacting with the Spotify API.
 
-    This client allows authentication and retrieval of the currently playing song for a specific user.
+    This client allows authentication and retrieval of the currently
+    playing song for a specific user.
 
     Attributes:
         client_id (str): The client ID for Spotify API authentication.
@@ -18,8 +20,8 @@ class SpotifyClient:
         username (str): The username associated with the Spotify account.
         scope (str): The access scope for the Spotify API.
         token (str): The authentication token for API requests.
-        maxTries (int): The maximum number of attempts for API requests in case of failure.
-        retryDelay (int): The delay between retries for API requests.
+        max_tries (int): The maximum number of attempts for API requests in case of failure.
+        retry_delay (int): The delay between retries for API requests.
     """
 
     def __init__(self, client_id, client_secret, username):
@@ -39,8 +41,8 @@ class SpotifyClient:
         self.username = username
         self.scope = "user-read-currently-playing"
         self.token = None
-        self.maxTries = 3
-        self.retryDelay = 5
+        self.max_tries = 3
+        self.retry_delay = 5
         self.authenticate()
 
     def authenticate(self):
@@ -55,9 +57,9 @@ class SpotifyClient:
                                                 self.client_id,
                                                 self.client_secret,
                                                 redirect_uri="https://www.google.com/")
-        
+
         if not self.token:
-            raise Exception("Error while authenticating")
+            raise requests.exceptions.RequestException("Authentication failed")
 
     def get_current_song(self):
         """
@@ -65,7 +67,7 @@ class SpotifyClient:
 
         This method sends a request to the Spotify API to fetch the currently playing
         song for the authenticated user. It retries the request in case of errors
-        up to `maxTries` times.
+        up to `max_tries` times.
 
         Returns:
             dict: A dictionary containing song details, such as song title, artist name,
@@ -75,36 +77,37 @@ class SpotifyClient:
         header = {"Authorization": f"Bearer {self.token}"}
         url = "https://api.spotify.com/v1/me/player/currently-playing"
 
-        for _ in range(self.maxTries):
+        for _ in range(self.max_tries):
             try:
-                response = requests.get(url, headers=header)
+                response = requests.get(url, headers=header, timeout=10)
                 if response.status_code == 200:
                     content = json.loads(response.text)
 
                     status = content.get("is_playing")
                     item = content.get("item")
                     name = item.get("name")
-                    artistName = item.get("album").get("artists")[0].get("name")
-                    imageUrl = item.get("album").get("images")[0].get("url")
-                    songID = item.get("id")
-                    songLength = item.get("duration_ms")
+                    artist_name = item.get("album").get("artists")[0].get("name")
+                    image_url = item.get("album").get("images")[0].get("url")
+                    song_id = item.get("id")
+                    song_length = item.get("duration_ms")
 
                     data = {
-                        "songTitle": name,
-                        "artistName": artistName,
-                        "imageUrl": imageUrl,
-                        "songID": songID,
-                        "songLength": songLength,
+                        "song_title": name,
+                        "artist_name": artist_name,
+                        "image_url": image_url,
+                        "song_id": song_id,
+                        "song_length": song_length,
                         "playing": status
                     }
 
                     # Check if all data values are valid
                     return data
-                else:
-                    return None
-            except Exception as e:
+            except requests.exceptions.RequestException as e:
                 print(f"Error while getting current song: {e}")
                 continue
+
+        return None
+
 
 
     def get_audio_analysis(self, song_id):
@@ -125,10 +128,9 @@ class SpotifyClient:
             "Content-Type": "application/json",
             "Authorization": f"Bearer {self.token}"
         }
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         if response.status_code == 200:
             return response.json()
-        else:
 
-            print("Error during request")
-            return None
+        print("Error during request")
+        return None

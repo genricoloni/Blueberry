@@ -1,3 +1,7 @@
+"""
+Module to manage configuration settings from a file.
+"""
+
 class ConfigManager:
     """
     A class to manage configuration settings from a file.
@@ -14,7 +18,8 @@ class ConfigManager:
         """
         Initialize a new instance of the ConfigManager class.
 
-        This method loads the configuration from the specified file and stores it in the `config` attribute.
+        This method loads the configuration from the specified file and stores 
+        it in the `config` attribute.
 
         Parameters:
             config_file (str): The path to the configuration file.
@@ -32,7 +37,7 @@ class ConfigManager:
         Returns:
             dict: A dictionary containing the loaded configuration settings.
         """
-        with open(self.config_file, 'r') as file:
+        with open(self.config_file, 'r', encoding='utf-8') as file:
             config = {}
             for line in file:
                 key, value = line.strip().split('=')

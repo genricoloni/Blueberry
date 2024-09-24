@@ -22,7 +22,7 @@ Frankly, I'm not sure yet how the script should handle different desktop environ
   - `testCommand`: the command to check if the desktop environment is installed
   - `command`: the command to set the wallpaper
   - `wallpaperPath`: the path where the original wallpaper is stored
-- the `getEnvironment` method checks which desktop environment is installed and returns the corresponding dictionary by checking the `testCommand` command
+- the `get_environment` method checks which desktop environment is installed and returns the corresponding dictionary by checking the `testCommand` command
 
 I don't know if this is the best way to handle different desktop environments, so I'm open to suggestions. However, if you want to add a new desktop environment, you should:
 

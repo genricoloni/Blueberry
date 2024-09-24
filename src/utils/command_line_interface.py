@@ -1,6 +1,11 @@
-import os
+"""
+Module for the Command Line Interface (CLI) of the SpotifySyncWall program.
+"""
 
-class CLI:
+import os
+import sys
+
+class CommandLineInterface:
     """
     Command Line Interface for the SpotifySyncWall program.
 
@@ -62,22 +67,21 @@ class CLI:
 
             if command == "exit":
                 print("Exiting the program...")
-                exit()
+                sys.exit(0)
 
             if command == "settings":
                 self.modify_modes()
                 input("Press Enter to continue...")
 
             if command == "save":
-                if not self.saveConfig():
+                if not self.save_config():
                     input("Press Enter to continue...")
                     continue
                 input("Configuration saved, press Enter to continue...")
 
 
             if command == "show":
-                self.showConfig()
-                
+                self.show_config()
                 input("Press Enter to continue...")
 
 
@@ -123,7 +127,7 @@ class CLI:
             print(f"New modes set: {self.modes}")
         else:
             print("No valid modes selected.")
-    
+
     def show_help(self):
         """
         Display the list of available CLI commands.
@@ -137,8 +141,8 @@ class CLI:
         print("\tsave - Save the current configuration to favorites.")
         print("\tshow - Display the current wallpaper configuration.")
         print("\texit - Exit the program.")
-    
-    def saveConfig(self):
+
+    def save_config(self):
         """
         Save the current wallpaper configuration.
 
@@ -152,17 +156,23 @@ class CLI:
         """
         try:
             #get the current song ID and mode
-            songID = self.wallpaper_generator.get_current_album()
+            song_id = self.wallpaper_generator.get_current_album()
             mode = self.wallpaper_generator.get_current_mode()
 
             #copy the current wallpaper to the savedConfigs folder
-            os.system(f"cp ImageCache/finalImage.png src/savedConfigs/{songID}-{mode}.png")
+            os.system(f"cp ImageCache/finalImage.png src/savedConfigs/{song_id}-{mode}.png")
             return True
-        except Exception as e:
+        except OSError as e:
             print(f"Error saving configuration: {e}")
             return False
+
+    def show_config(self):
+        """
+        Display the current wallpaper configuration.
         
-    def showConfig(self):
+        Prints the current song, artist, and wallpaper generation mode.
+        """
         print("Current configuration:")
-        print(f"\t{self.wallpaper_generator.get_current_song()} by {self.wallpaper_generator.get_current_artist()} in mode: {self.wallpaper_generator.get_current_mode()}")
-        print("")   
+        print(f"""\t{self.wallpaper_generator.get_current_song()} by\
+ {self.wallpaper_generator.get_current_artist()} in mode:\
+ {self.wallpaper_generator.get_current_mode()}""")

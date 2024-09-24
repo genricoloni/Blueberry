@@ -29,7 +29,7 @@ def create_waveform_image(audio_analysis, display, cover_image, artist_name, son
 
     # Generate text image with the song title and artist name
     text_image = utils.images.generate_text_image(
-        song_title, artist_name, colors, display, positionX=50, positionY=height - 150
+        song_title, artist_name, colors, display, position_x=50, position_y=height - 150
     )
 
     # Create the final image with the background color

@@ -28,7 +28,7 @@ def generate_gradient_image(colors, display, album_image_width, song_title, arti
         bg = create_centered_gradient(colors, display, album_image_width)
         # Generate text with the darkest color
         text = generate_text_image(
-            song_title, artist_name, find_darkest_color(colors), display, positionX=50, positionY=50
+            song_title, artist_name, find_darkest_color(colors), display, position_x=50, position_y=50
         )
     
     # Paste the album image and save the final image

@@ -1,3 +1,7 @@
+"""
+Module for image processing functions.
+"""
+
 import math
 from PIL import Image, ImageDraw, ImageFont
 
@@ -12,7 +16,7 @@ def paste_and_save_album_image(bg, cover, display, text):
     """
 
     width = int(display[0])
-    height = int(display[1])   
+    height = int(display[1])
 
     # Calculate the center coordinates for pasting
     center_x = int(width / 2 - cover.width / 2)
@@ -28,20 +32,20 @@ def paste_and_save_album_image(bg, cover, display, text):
 
     background.save("ImageCache/finalImage.png")
 
-
-def generate_text_image(songTitle, artistName, colors, display, positionX=50, positionY=50):
+# pylint: disable="too-many-arguments"
+def generate_text_image(song_title, artist_name, colors, display, position_x=50, position_y=50):
     """
     Generate a text image containing the song title and artist name.
 
     This function creates an image with the song title and artist name rendered onto it.
 
     Parameters:
-        songTitle (str): The title of the song.
-        artistName (str): The name of the artist.
+        song_title (str): The title of the song.
+        artist_name (str): The name of the artist.
         colors (list): A list of colors to use for the text.
         display (list): The dimensions of the display.
-        positionX (int, optional): The x-coordinate of the text. Defaults to 50.
-        positionY (int, optional): The y-coordinate of the text. Defaults to 50.
+        position_x (int, optional): The x-coordinate of the text. Defaults to 50.
+        position_y (int, optional): The y-coordinate of the text. Defaults to 50.
 
     Returns:
         Image: A new image with the song title and artist name.
@@ -49,21 +53,23 @@ def generate_text_image(songTitle, artistName, colors, display, positionX=50, po
     width = int(display[0])
     height = int(display[1])
 
-    textColor = colors[0].rgb
+    text_color = colors[0].rgb
 
     # Adjust text color to ensure contrast
-    if (textColor[0] * 0.299 + textColor[1] * 0.587 + textColor[2] * 0.114) > 186:
-        textColor = (0, 0, 0)  # Black text for light backgrounds
+    if (text_color[0] * 0.299 + text_color[1] * 0.587 + text_color[2] * 0.114) > 186:
+        text_color = (0, 0, 0)  # Black text for light backgrounds
     else:
-        textColor = (255, 255, 255)  # White text for dark backgrounds
+        text_color = (255, 255, 255)  # White text for dark backgrounds
 
     # Create a new transparent image for the text
     text = Image.new('RGBA', (width, height), (0, 0, 0, 0))
     draw = ImageDraw.Draw(text)
 
     # Set font and draw the text
-    myFont = ImageFont.truetype("./fonts/Rubik.ttf", 40)
-    draw.text((positionX, positionY), (songTitle + "\n" + artistName), font=myFont, fill=textColor)
+    my_font = ImageFont.truetype("./fonts/Rubik.ttf", 40)
+    draw.text((position_x, position_y),
+              (song_title + "\n" + artist_name),
+              font=my_font, fill=text_color)
 
     return text
 
@@ -126,9 +132,10 @@ def find_darkest_color(colors):
 
     if distance1 > distance2:
         return [colors[0], colors[1]]
-    else:
-        return [colors[1], colors[0]]
 
+    return [colors[1], colors[0]]
+
+# pylint: disable=no-member
 def resize_and_center_image(image, target_width, target_height):
     """
     Resizes an image to a target width, and centers it vertically.
@@ -151,7 +158,8 @@ def resize_and_center_image(image, target_width, target_height):
     # Center the image vertically
     if new_width > target_width:
         x_offset = (new_width - target_width) // 2
-        resized_and_centered_image = resized_image.crop((x_offset, 0, x_offset + target_width, new_height))
+        resized_and_centered_image = resized_image.crop((
+            x_offset, 0, x_offset + target_width, new_height))
     else:
         resized_and_centered_image = resized_image
 

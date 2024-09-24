@@ -1,3 +1,6 @@
+"""
+Module for handling the system environment and wallpaper management based on song changes.
+"""
 import os
 
 class Handler:
@@ -8,37 +11,42 @@ class Handler:
     managing wallpaper settings, and restoring or setting wallpapers based on current song changes.
 
     Attributes:
-        songID (str): The ID of the currently playing song.
+        song_id (str): The ID of the currently playing song.
         playing (bool): A flag indicating whether the song is currently playing or paused.
-        availableEnvironment (list): A list of available environments to interact with (e.g., GNOME).
+        available_environments (list): A list of available environments to interact with.
         favorites (dict): A dictionary of saved favorite album configurations.
         environment (str): The current environment name.
         command (str): The command used to change the wallpaper.
-        originalWallpaper (str): The original wallpaper to restore.
+        original_wallpaper (str): The original wallpaper to restore.
     """
 
+    # pylint: disable=C0301
     def __init__(self):
         """
         Initialize the Handler instance.
 
-        This method sets up the default values for `songID` and `playing`, checks the available environment
-        (such as GNOME), loads the favorites, and determines the current environment, command, and original wallpaper.
+        This method sets up the default values for `song_id` and `playing`,
+        checks the available environment
+        loads the favorites, and determines the current environment, 
+        command, and original wallpaper.
         """
-        self.songID = None
+        self.song_id = None
         self.playing = False
 
-        self.availableEnvironment = [
+        self.available_environments = [
             {'envName': 'gnome',
              'testCommand': 'gnome-session',
              'command': 'gsettings set org.gnome.desktop.background picture-uri ' if ('dark' if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else 'light') == 'light' else 'gsettings set org.gnome.desktop.background picture-uri-dark ',
              'wallpaperPath': os.popen("gsettings get org.gnome.desktop.background picture-uri-dark").read() if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else os.popen("gsettings get org.gnome.desktop.background picture-uri").read()
              }
         ]
-        
-        self.favorites = self.loadFavorites()
-        self.enviroment, self.command, self.originalWallpaper = self.getEnvironment()
+        self.favorites = self.load_favorites()
+        self.environment, self.command, self.original_wallpaper = self.get_environment()
 
-    def getEnvironment(self):
+        if not self.environment or not self.command or not self.original_wallpaper:
+            raise EnvironmentError("Environment not supported")
+
+    def get_environment(self):
         """
         Detect the current environment (e.g., GNOME).
 
@@ -50,22 +58,23 @@ class Handler:
             tuple: A tuple containing the environment name (str), the wallpaper command (str),
             and the original wallpaper path (str).
         """
-        for env in self.availableEnvironment:
+        for env in self.available_environments:
             result = os.popen(env['testCommand']).read().strip()
             if not result:
                 return env['envName'], env['command'], os.popen("gsettings get org.gnome.desktop.background picture-uri-dark").read() if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else os.popen("gsettings get org.gnome.desktop.background picture-uri").read()
+        return None, None, None
 
     def previous_song(self):
         """
         Check the previous song.
 
-        This method returns the songID of the previously played song to compare with the current one.
+        This method returns the song_id of the previously played song to compare with the current one.
 
         Returns:
             str: The ID of the previous song.
         """
-        return self.songID
-    
+        return self.song_id
+
     def is_paused(self):
         """
         Check if the current song is paused.
@@ -76,17 +85,17 @@ class Handler:
             bool: True if the song is paused, False if it is playing.
         """
         return self.playing
-    
-    def change_song(self, songID):
+
+    def change_song(self, song_id):
         """
         Update the current song ID.
 
-        This method updates the songID to the new song's ID when the song changes.
+        This method updates the song_id to the new song's ID when the song changes.
 
         Parameters:
-            songID (str): The ID of the new song.
+            song_id (str): The ID of the new song.
         """
-        self.songID = songID
+        self.song_id = song_id
 
     def change_status(self, status):
         """
@@ -107,7 +116,7 @@ class Handler:
         """
         self.playing = "False"
 
-    def loadFavorites(self):
+    def load_favorites(self):
         """
         Load saved favorite album configurations.
 
@@ -122,25 +131,25 @@ class Handler:
         if not os.path.exists(path):
             os.makedirs(path)
             return []
-        
+
         files = os.listdir(path)
         favorites = {}
 
         for file in files:
-            albumID, mode = file.split(".")[0].split("-")
-            favorites[albumID] = mode
+            album_id, mode = file.split(".")[0].split("-")
+            favorites[album_id] = mode
 
         return favorites
-    
-    def restoreWallpaper(self):
+
+    def restore_wallpaper(self):
         """
         Restore the original wallpaper.
 
         This method restores the desktop wallpaper to the original one before any song change.
         """
-        os.system(f"{self.command}{self.originalWallpaper}")
+        os.system(f"{self.command}{self.original_wallpaper}")
 
-    def setWallpaper(self, path="ImageCache/finalImage.png"):
+    def set_wallpaper(self, path="ImageCache/finalImage.png"):
         """
         Set a new wallpaper based on the current song.
 
@@ -148,16 +157,16 @@ class Handler:
         """
         os.system(f"{self.command}" + os.path.abspath(path))
 
-    def same_song(self, songID):
+    def same_song(self, song_id):
         """
         Check if the current song is the same as the previous one.
 
-        This method compares the new song's ID with the stored songID to determine if the song has changed.
+        This method compares the new song's ID with the stored song_id to determine if the song has changed.
 
         Parameters:
-            songID (str): The ID of the current song.
+            song_id (str): The ID of the current song.
 
         Returns:
-            bool: True if the songID matches the previous song, False otherwise.
+            bool: True if the song_id matches the previous song, False otherwise.
         """
-        return self.songID == songID
+        return self.song_id == song_id
