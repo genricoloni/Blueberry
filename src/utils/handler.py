@@ -36,7 +36,7 @@ class Handler:
         self.available_environments = [
             {'envName': 'gnome',
              'testCommand': 'gnome-session',
-             'command': 'gsettings set org.gnome.desktop.background picture-uri ' if ('dark' if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else 'light') == 'light' else 'gsettings set org.gnome.desktop.background picture-uri-dark ',
+             'command': 'gsettings set org.gnome.desktop.background picture-uri ' if ('dark' if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface color-scheme").read()) else 'light') == 'light' else 'gsettings set org.gnome.desktop.background picture-uri-dark ',
              'wallpaperPath': os.popen("gsettings get org.gnome.desktop.background picture-uri-dark").read() if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else os.popen("gsettings get org.gnome.desktop.background picture-uri").read()
              }
         ]
@@ -61,7 +61,7 @@ class Handler:
         for env in self.available_environments:
             result = os.popen(env['testCommand']).read().strip()
             if not result:
-                return env['envName'], env['command'], os.popen("gsettings get org.gnome.desktop.background picture-uri-dark").read() if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface gtk-theme").read()) else os.popen("gsettings get org.gnome.desktop.background picture-uri").read()
+                return env['envName'], env['command'], os.popen("gsettings get org.gnome.desktop.background picture-uri-dark").read().strip() if 'dark' in (os.popen("gsettings get org.gnome.desktop.interface color-scheme").read()) else os.popen("gsettings get org.gnome.desktop.background picture-uri").read()
         return None, None, None
 
     def previous_song(self):
@@ -155,6 +155,7 @@ class Handler:
 
         This method updates the desktop wallpaper to the generated image associated with the current song.
         """
+        print(f"{self.command}" + os.path.abspath(path))
         os.system(f"{self.command}" + os.path.abspath(path))
 
     def same_song(self, song_id):
