@@ -47,7 +47,7 @@ def main():
     stop_event = threading.Event()  # Signal for the thread to stop
     modes = ["gradient",
              "blurred",
-             "waveform",
+             #"waveform", THANKS SPOTIFY FOR SHUTTING DOWN THE AUDIO ANALYSIS ENDPOINT
              "albumImage",
              "controllerImage",
              "lyric"]

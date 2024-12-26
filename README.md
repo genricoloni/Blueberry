@@ -6,6 +6,10 @@
 
  NOTE: if you wanna contribute, please, read the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
+## IMPORTANT NOTE ON SPOTIFY API SHUTDOWN
+
+Spotify has UNILATERALLY changed its API policy, shutting down the possibility to reach certains endpoint for applications that hasn't been verified by Spotify itself. Here's the official statement: [Spotify API Policy](https://developer.spotify.com/blog/2024-11-27-changes-to-the-web-api). As you can read in the [Spotify Community Thread](https://community.spotify.com/t5/Spotify-for-Developers/Changes-to-Web-API/td-p/6540414), no one is happy with these changes, and I can only agree with them.
+
 ## Images
 
 There are 6 modes: Album Cover, Gradient (up-down and center-out), Blurred, Waveform, Controller and Lyric card. From now, you can choose which one to use by setting them using the `settings` command in the CLI. Here are some examples:
@@ -16,7 +20,7 @@ There are 6 modes: Album Cover, Gradient (up-down and center-out), Blurred, Wave
 
 ![Blurred mode](src/img/blurred.png)
 
-![Waveform mode](src/img/Waveform.png)
+![Waveform mode - DEPRECATED](src/img/Waveform.png)
 
 ![Gradient mode from the center](src/img/centeredGradient.png)
 
